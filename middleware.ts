@@ -5,7 +5,7 @@ import { authConfig } from "@/lib/auth.config";
 const { auth } = NextAuth(authConfig);
 
 // Public marketplace pages, viewable whether logged in or not.
-const OPEN_PATHS = ["/search", "/clinics"];
+const OPEN_PATHS = ["/", "/search", "/clinics"];
 
 // Only reachable when signed out of the matching realm.
 const CLINIC_AUTH_ONLY_PATHS = ["/login", "/register"];
@@ -47,7 +47,7 @@ export default auth((req) => {
   const isClinicAuthOnly = CLINIC_AUTH_ONLY_PATHS.some((path) => matchesPath(pathname, path));
   if (isClinicAuthOnly) {
     if (role === "clinic") {
-      return NextResponse.redirect(new URL("/", nextUrl.origin));
+      return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
     }
     return NextResponse.next();
   }

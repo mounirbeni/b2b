@@ -35,7 +35,7 @@ export default function LoginPage() {
     }
 
     toast.success("تم تسجيل الدخول بنجاح");
-    router.push("/");
+    router.push("/dashboard");
     router.refresh();
   }
 

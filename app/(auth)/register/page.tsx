@@ -63,7 +63,7 @@ export default function RegisterPage() {
     }
 
     toast.success("تم إنشاء الحساب بنجاح");
-    router.push("/");
+    router.push("/dashboard");
     router.refresh();
   }
 

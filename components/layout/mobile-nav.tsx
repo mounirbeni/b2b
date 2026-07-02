@@ -7,7 +7,7 @@ import { BarChart3, CalendarDays, LayoutDashboard, Settings, Users } from "lucid
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { href: "/", label: "الرئيسية", icon: LayoutDashboard },
+  { href: "/dashboard", label: "الرئيسية", icon: LayoutDashboard },
   { href: "/patients", label: "المرضى", icon: Users },
   { href: "/appointments", label: "المواعيد", icon: CalendarDays },
   { href: "/reports", label: "التقارير", icon: BarChart3 },
@@ -23,7 +23,7 @@ export function MobileNav() {
       aria-label="التنقل الرئيسي"
     >
       {NAV_ITEMS.map((item) => {
-        const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+        const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
         const Icon = item.icon;
         return (
           <Link
