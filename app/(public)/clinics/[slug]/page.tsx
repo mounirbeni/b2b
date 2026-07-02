@@ -18,7 +18,7 @@ export default async function ClinicProfilePage({ params }: { params: { slug: st
   if (!clinic || !clinic.specialty || !clinic.city || clinic.status !== "APPROVED") notFound();
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4">
+    <div className="mx-auto max-w-2xl space-y-4 px-4 py-8 md:px-6">
       <Card>
         <CardHeader>
           <Badge variant="outline" className="w-fit">

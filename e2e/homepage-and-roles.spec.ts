@@ -3,7 +3,7 @@ import { registerClinic, registerPatient, testPhone, uniqueSuffix } from "./help
 
 test("anonymous visitor sees the public homepage, not a login redirect", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByText("ابحث واحجز موعدك الطبي")).toBeVisible();
+  await expect(page.getByText("احجز موعدك الطبي")).toBeVisible();
   await expect(page).toHaveURL("/");
 });
 
