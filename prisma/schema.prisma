@@ -87,21 +87,38 @@ model Patient {
 }
 
 model Appointment {
-  id        String        @id @default(cuid())
-  dateTime  DateTime
-  duration  Int           @default(30)
-  status    String        @default("SCHEDULED")
-  type      String        @default("CONSULTATION")
-  notes     String?
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  patientId String
-  patient   Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  clinicId  String
-  clinic    Clinic        @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  reminders ReminderLog[]
+  id               String          @id @default(cuid())
+  dateTime         DateTime
+  duration         Int             @default(30)
+  status           String          @default("SCHEDULED")
+  type             String          @default("CONSULTATION")
+  notes            String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  patientId        String
+  patient          Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  clinicId         String
+  clinic           Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patientAccountId String?
+  patientAccount   PatientAccount? @relation(fields: [patientAccountId], references: [id], onDelete: SetNull)
+  reminders        ReminderLog[]
 
   @@index([clinicId, dateTime])
+  @@index([patientAccountId])
+}
+
+/// A patient's own login (separate from the per-clinic Patient CRM record), used for
+/// booking across clinics from the public directory and viewing "my bookings".
+model PatientAccount {
+  id        String        @id @default(cuid())
+  name      String
+  phone     String        @unique
+  email     String?       @unique
+  password  String
+  city      String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  bookings  Appointment[]
 }
 
 model ReminderLog {

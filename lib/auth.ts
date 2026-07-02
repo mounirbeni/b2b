@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "@/lib/auth.config";
+import { normalizeMoroccanPhone } from "@/lib/phone";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
@@ -32,8 +33,42 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           id: user.id,
           name: user.name,
           email: user.email,
+          role: "clinic",
           clinicId: user.clinic.id,
           clinicName: user.clinic.name,
+        };
+      },
+    }),
+    Credentials({
+      id: "patient-credentials",
+      name: "Patient",
+      credentials: {
+        identifier: {},
+        password: {},
+      },
+      authorize: async (credentials) => {
+        const identifier = credentials?.identifier as string | undefined;
+        const password = credentials?.password as string | undefined;
+
+        if (!identifier || !password) return null;
+
+        const trimmed = identifier.trim();
+        const patient = await prisma.patientAccount.findFirst({
+          where: {
+            OR: [{ phone: normalizeMoroccanPhone(trimmed) }, { email: trimmed.toLowerCase() }],
+          },
+        });
+
+        if (!patient) return null;
+
+        const valid = await bcrypt.compare(password, patient.password);
+        if (!valid) return null;
+
+        return {
+          id: patient.id,
+          name: patient.name,
+          email: patient.email,
+          role: "patient",
         };
       },
     }),

@@ -13,16 +13,18 @@ export const authConfig: NextAuthConfig = {
     jwt: async ({ token, user }) => {
       if (user) {
         token.id = user.id;
-        token.clinicId = (user as { clinicId: string }).clinicId;
-        token.clinicName = (user as { clinicName?: string | null }).clinicName;
+        token.role = user.role;
+        token.clinicId = user.clinicId;
+        token.clinicName = user.clinicName;
       }
       return token;
     },
     session: async ({ session, token }) => {
       if (session.user) {
         session.user.id = token.id as string;
-        session.user.clinicId = token.clinicId as string;
-        session.user.clinicName = token.clinicName as string | null;
+        session.user.role = token.role as "clinic" | "patient";
+        session.user.clinicId = token.clinicId as string | undefined;
+        session.user.clinicName = token.clinicName as string | null | undefined;
       }
       return session;
     },

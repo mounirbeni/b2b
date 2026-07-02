@@ -37,6 +37,25 @@ export const patientSchema = z.object({
   notes: z.string().optional(),
 });
 
+export const patientAccountRegisterSchema = z.object({
+  name: z.string().min(2, "الاسم مطلوب"),
+  phone: z.string().min(6, "رقم الهاتف مطلوب"),
+  email: z.string().email("بريد إلكتروني غير صالح").optional().or(z.literal("")),
+  password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
+  city: z.enum(MOROCCAN_CITIES).optional().or(z.literal("")),
+});
+
+export const patientAccountLoginSchema = z.object({
+  identifier: z.string().min(1, "الهاتف أو البريد الإلكتروني مطلوب"),
+  password: z.string().min(1, "كلمة المرور مطلوبة"),
+});
+
+export const bookingSchema = z.object({
+  clinicSlug: z.string().min(1),
+  date: z.string().min(1, "التاريخ مطلوب"),
+  time: z.string().min(1, "الوقت مطلوب"),
+});
+
 export const appointmentSchema = z.object({
   patientId: z.string().min(1, "المريض مطلوب"),
   date: z.string().min(1, "التاريخ مطلوب"),

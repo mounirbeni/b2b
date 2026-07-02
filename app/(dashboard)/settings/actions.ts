@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
+import { requireClinicSession } from "@/lib/auth-guard";
 import { prisma } from "@/lib/prisma";
 import { clinicSettingsSchema } from "@/lib/validations";
 
@@ -11,8 +11,8 @@ export interface UpdateSettingsResult {
 }
 
 export async function updateSettingsAction(formData: FormData): Promise<UpdateSettingsResult> {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const session = await requireClinicSession();
+  if (!session) {
     return { success: false, error: "غير مصرح" };
   }
 

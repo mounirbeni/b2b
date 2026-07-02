@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireClinicSession } from "@/lib/auth-guard";
 import { prisma } from "@/lib/prisma";
 import { appointmentSchema } from "@/lib/validations";
 import { combineDateAndTime } from "@/lib/date-utils";
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const session = await requireClinicSession();
+  if (!session) {
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
 
@@ -40,8 +40,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const session = await requireClinicSession();
+  if (!session) {
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
 

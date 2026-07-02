@@ -2,13 +2,18 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MapPin, Phone } from "lucide-react";
 
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { BookingWidget } from "@/components/booking/booking-widget";
 import { SPECIALTY_LABELS, type Specialty } from "@/types";
 
 export default async function ClinicProfilePage({ params }: { params: { slug: string } }) {
-  const clinic = await prisma.clinic.findUnique({ where: { slug: params.slug } });
+  const [clinic, session] = await Promise.all([
+    prisma.clinic.findUnique({ where: { slug: params.slug } }),
+    auth(),
+  ]);
 
   if (!clinic || !clinic.specialty || !clinic.city) notFound();
 
@@ -35,11 +40,7 @@ export default async function ClinicProfilePage({ params }: { params: { slug: st
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="p-4 text-center text-sm text-muted-foreground">
-          الحجز الإلكتروني عبر المنصة متاح قريباً. تواصل مع العيادة مباشرة حالياً للحجز.
-        </CardContent>
-      </Card>
+      <BookingWidget clinicSlug={clinic.slug} isPatient={session?.user?.role === "patient"} />
 
       <div className="text-center">
         <Link href="/search" className="text-sm text-primary underline-offset-4 hover:underline">
