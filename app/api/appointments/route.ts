@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
 
   const appointments = await prisma.appointment.findMany({
     where: {
-      userId: session.user.id,
+      clinicId: session.user.clinicId,
       ...(dateTimeFilter && { dateTime: dateTimeFilter }),
     },
     include: { patient: true, reminders: true },
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
   }
 
   const patient = await prisma.patient.findFirst({
-    where: { id: parsed.data.patientId, userId: session.user.id },
+    where: { id: parsed.data.patientId, clinicId: session.user.clinicId },
   });
   if (!patient) {
     return NextResponse.json({ error: "المريض غير موجود" }, { status: 404 });
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
         notes: parsed.data.notes,
         status: parsed.data.status ?? "SCHEDULED",
         patientId: parsed.data.patientId,
-        userId: session.user.id,
+        clinicId: session.user.clinicId,
       },
       include: { patient: true },
     });

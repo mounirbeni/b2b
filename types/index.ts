@@ -1,6 +1,6 @@
-import type { Appointment, Patient, ReminderLog, User } from "@prisma/client";
+import type { Appointment, Clinic, Patient, ReminderLog, User } from "@prisma/client";
 
-export type { Appointment, Patient, ReminderLog, User };
+export type { Appointment, Clinic, Patient, ReminderLog, User };
 
 export type Status =
   | "SCHEDULED"

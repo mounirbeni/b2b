@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateSettingsAction } from "./actions";
-import type { User } from "@/types";
+import type { Clinic, User } from "@/types";
 
-export function SettingsForm({ user }: { user: User }) {
+export function SettingsForm({ user, clinic }: { user: User; clinic: Clinic }) {
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -31,7 +31,7 @@ export function SettingsForm({ user }: { user: User }) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="clinicName">اسم العيادة</Label>
-          <Input id="clinicName" name="clinicName" defaultValue={user.clinicName ?? ""} required />
+          <Input id="clinicName" name="clinicName" defaultValue={clinic.name} required />
         </div>
         <div className="space-y-2">
           <Label htmlFor="name">اسمك الكامل</Label>
@@ -47,7 +47,7 @@ export function SettingsForm({ user }: { user: User }) {
         </div>
         <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="address">عنوان العيادة</Label>
-          <Input id="address" name="address" defaultValue={user.address ?? ""} />
+          <Input id="address" name="address" defaultValue={clinic.address ?? ""} />
         </div>
       </div>
       <Button type="submit" disabled={saving}>

@@ -11,7 +11,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   }
 
   const appointment = await prisma.appointment.findFirst({
-    where: { id: params.id, userId: session.user.id },
+    where: { id: params.id, clinicId: session.user.clinicId },
     include: { patient: true, reminders: true },
   });
 
@@ -28,7 +28,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
 
-  const existing = await prisma.appointment.findFirst({ where: { id: params.id, userId: session.user.id } });
+  const existing = await prisma.appointment.findFirst({ where: { id: params.id, clinicId: session.user.clinicId } });
   if (!existing) {
     return NextResponse.json({ error: "الموعد غير موجود" }, { status: 404 });
   }
@@ -66,7 +66,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
 
-  const existing = await prisma.appointment.findFirst({ where: { id: params.id, userId: session.user.id } });
+  const existing = await prisma.appointment.findFirst({ where: { id: params.id, clinicId: session.user.clinicId } });
   if (!existing) {
     return NextResponse.json({ error: "الموعد غير موجود" }, { status: 404 });
   }

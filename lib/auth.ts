@@ -20,9 +20,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         const user = await prisma.user.findUnique({
           where: { email: email.toLowerCase().trim() },
+          include: { clinic: true },
         });
 
-        if (!user || !user.password) return null;
+        if (!user || !user.password || !user.clinic) return null;
 
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) return null;
@@ -31,7 +32,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           id: user.id,
           name: user.name,
           email: user.email,
-          clinicName: user.clinicName,
+          clinicId: user.clinic.id,
+          clinicName: user.clinic.name,
         };
       },
     }),

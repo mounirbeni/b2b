@@ -17,8 +17,8 @@ export async function POST(req: NextRequest) {
   }
 
   const appointment = await prisma.appointment.findFirst({
-    where: { id: appointmentId, userId: session.user.id },
-    include: { patient: true, user: true },
+    where: { id: appointmentId, clinicId: session.user.clinicId },
+    include: { patient: true, clinic: true },
   });
 
   if (!appointment) {
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     name: appointment.patient.name,
     date: appointment.dateTime,
     time: appointment.dateTime,
-    clinicName: appointment.user.clinicName ?? "العيادة",
+    clinicName: appointment.clinic.name,
   });
 
   const statusCallbackUrl = `${req.nextUrl.origin}/api/whatsapp/status`;

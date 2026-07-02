@@ -34,21 +34,37 @@ model Session {
 }
 
 model User {
-  id            String        @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String?       @unique
+  email         String?   @unique
   emailVerified DateTime?
   image         String?
   password      String?
-  clinicName    String?
   phone         String?
-  address       String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   accounts      Account[]
   sessions      Session[]
-  patients      Patient[]
-  appointments  Appointment[]
+  clinic        Clinic?
+}
+
+/// A clinic is the tenant that owns patients/appointments. One owner per clinic for now;
+/// ownerId is kept on Clinic (not User) so multi-staff clinics can be added later without
+/// restructuring this relationship.
+model Clinic {
+  id           String        @id @default(cuid())
+  ownerId      String        @unique
+  owner        User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  slug         String        @unique
+  name         String
+  specialty    String?
+  city         String?
+  address      String?
+  description  String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  patients     Patient[]
+  appointments Appointment[]
 }
 
 model Patient {
@@ -62,9 +78,11 @@ model Patient {
   notes        String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-  userId       String
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clinicId     String
+  clinic       Clinic        @relation(fields: [clinicId], references: [id], onDelete: Cascade)
   appointments Appointment[]
+
+  @@index([clinicId])
 }
 
 model Appointment {
@@ -78,9 +96,11 @@ model Appointment {
   updatedAt DateTime      @updatedAt
   patientId String
   patient   Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clinicId  String
+  clinic    Clinic        @relation(fields: [clinicId], references: [id], onDelete: Cascade)
   reminders ReminderLog[]
+
+  @@index([clinicId, dateTime])
 }
 
 model ReminderLog {

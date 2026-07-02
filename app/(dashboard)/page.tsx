@@ -7,7 +7,7 @@ import type { AppointmentWithPatient } from "@/types";
 
 export default async function DashboardPage() {
   const session = await auth();
-  const userId = session!.user.id;
+  const clinicId = session!.user.clinicId;
 
   const now = new Date();
   const dateKey = now.toISOString().slice(0, 10);
@@ -17,7 +17,7 @@ export default async function DashboardPage() {
   end.setHours(23, 59, 59, 999);
 
   const appointments = await prisma.appointment.findMany({
-    where: { userId, dateTime: { gte: start, lte: end } },
+    where: { clinicId, dateTime: { gte: start, lte: end } },
     include: { patient: true, reminders: true },
     orderBy: { dateTime: "asc" },
   });

@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
       status: "SCHEDULED",
       dateTime: { gte: rangeStart, lte: rangeEnd },
     },
-    include: { patient: true, user: true, reminders: true },
+    include: { patient: true, clinic: true, reminders: true },
   });
 
   const statusCallbackUrl = `${req.nextUrl.origin}/api/whatsapp/status`;
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
       name: appointment.patient.name,
       date: appointment.dateTime,
       time: appointment.dateTime,
-      clinicName: appointment.user.clinicName ?? "العيادة",
+      clinicName: appointment.clinic.name,
     });
 
     const result = await sendWhatsAppMessage(appointment.patient.phone, message, statusCallbackUrl);

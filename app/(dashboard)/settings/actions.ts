@@ -26,7 +26,13 @@ export async function updateSettingsAction(formData: FormData): Promise<UpdateSe
 
   await prisma.user.update({
     where: { id: session.user.id },
-    data: { clinicName, name, phone: phone || null, address: address || null },
+    data: {
+      name,
+      phone: phone || null,
+      clinic: {
+        update: { name: clinicName, address: address || null },
+      },
+    },
   });
 
   revalidatePath("/settings");

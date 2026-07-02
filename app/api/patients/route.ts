@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
   const pageSize = 20;
 
   const where = {
-    userId: session.user.id,
+    clinicId: session.user.clinicId,
     ...(search
       ? {
           OR: [
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
         gender: parsed.data.gender || null,
         address: parsed.data.address,
         notes: parsed.data.notes,
-        userId: session.user.id,
+        clinicId: session.user.clinicId,
       },
     });
     return NextResponse.json(patient, { status: 201 });
