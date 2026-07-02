@@ -8,8 +8,9 @@ datasource db {
   url       = env("DATABASE_URL")
   // Direct (non-pooled) connection — used only by `prisma migrate deploy`. Neon's pooler runs
   // in transaction mode, which can't hold the session-level advisory lock migrations need,
-  // so migrating over DATABASE_URL alone times out with P1002.
-  directUrl = env("DIRECT_URL")
+  // so migrating over DATABASE_URL alone times out with P1002. Reuses the Vercel/Neon
+  // integration's own unpooled variable instead of requiring a separate DIRECT_URL.
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 model Account {
