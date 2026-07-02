@@ -2,7 +2,7 @@ import {
   Boxes, Plus, Search, AlertTriangle, Package, TrendingDown, CalendarClock, Filter, ShoppingCart,
 } from "lucide-react";
 import { inventory } from "@/lib/medflow/data";
-import { StatTile, PageHeader, Pill, ProgressBar } from "@/components/medflow/ui";
+import { StatTile, PageHeader, Pill, ProgressBar, DemoBanner } from "@/components/medflow/ui";
 
 const STATS = [
   { label: "Total Items", value: "1,842", icon: <Package size={18} />, tone: "primary", delta: 3.1 },
@@ -25,6 +25,8 @@ export default function InventoryPage() {
         <button className="mf-btn mf-btn-outline"><ShoppingCart size={16} /> Purchase Order</button>
         <button className="mf-btn mf-btn-primary"><Plus size={16} /> Add Item</button>
       </PageHeader>
+
+      <DemoBanner feature="Inventory tracking" />
 
       <div className="mf-stagger grid grid-cols-2 gap-4 lg:grid-cols-4">
         {STATS.map((s) => <StatTile key={s.label} label={s.label} value={s.value} icon={s.icon} tone={s.tone as any} delta={s.delta} invertDelta={(s as any).invert} />)}

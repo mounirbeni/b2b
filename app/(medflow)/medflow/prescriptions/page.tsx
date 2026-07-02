@@ -5,7 +5,7 @@ import {
   Pill, Search, Plus, Trash2, Printer, Send, FileDown, Sparkles, Stethoscope, X, Check,
 } from "lucide-react";
 import { medicines } from "@/lib/medflow/data";
-import { Avatar, PageHeader, SectionCard, Pill as Chip } from "@/components/medflow/ui";
+import { Avatar, PageHeader, SectionCard, Pill as Chip, DemoBanner } from "@/components/medflow/ui";
 
 type Rx = { id: number; name: string; dosage: string; freq: string; duration: string; instr: string };
 
@@ -31,6 +31,8 @@ export default function PrescriptionsPage() {
         <button className="mf-btn mf-btn-outline"><FileDown size={16} /> Export PDF</button>
         <button className="mf-btn mf-btn-primary"><Send size={16} /> Send to Patient</button>
       </PageHeader>
+
+      <DemoBanner feature="Prescription history and PDF generation" />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Builder */}

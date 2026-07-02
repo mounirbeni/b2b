@@ -37,7 +37,7 @@ export default function LoginPage() {
     toast.success("تم تسجيل الدخول بنجاح");
     const sessionRes = await fetch("/api/auth/session");
     const session = await sessionRes.json();
-    router.push(session?.user?.role === "admin" ? "/admin" : "/dashboard");
+    router.push(session?.user?.role === "admin" ? "/admin" : "/medflow/dashboard");
     router.refresh();
   }
 

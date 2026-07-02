@@ -2,7 +2,7 @@ import {
   FlaskConical, Plus, Search, Clock, CheckCircle2, Activity, Upload, MessageSquare, Filter,
 } from "lucide-react";
 import { labRequests } from "@/lib/medflow/data";
-import { Avatar, StatTile, PageHeader, Pill, SectionCard } from "@/components/medflow/ui";
+import { Avatar, StatTile, PageHeader, Pill, SectionCard, DemoBanner } from "@/components/medflow/ui";
 
 const STATS = [
   { label: "Pending Tests", value: "18", icon: <Clock size={18} />, tone: "warning", delta: -4 },
@@ -27,6 +27,8 @@ export default function LaboratoryPage() {
         <button className="mf-btn mf-btn-outline"><Upload size={16} /> Upload Report</button>
         <button className="mf-btn mf-btn-primary"><Plus size={16} /> New Request</button>
       </PageHeader>
+
+      <DemoBanner feature="Lab test requests and results" />
 
       <div className="mf-stagger grid grid-cols-2 gap-4 lg:grid-cols-4">
         {STATS.map((s) => <StatTile key={s.label} {...s} tone={s.tone as any} invertDelta={s.label !== "Completed Today"} />)}

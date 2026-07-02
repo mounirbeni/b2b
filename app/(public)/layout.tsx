@@ -26,7 +26,7 @@ export default async function PublicLayout({ children }: { children: React.React
             </Link>
           )}
           {isClinic ? (
-            <Link href="/dashboard" className="text-slate-600 hover:text-primary">
+            <Link href="/medflow/dashboard" className="text-slate-600 hover:text-primary">
               لوحة تحكم العيادة
             </Link>
           ) : (

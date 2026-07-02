@@ -1,5 +1,5 @@
 import { UsersRound, Plus, Search, Filter, ShieldCheck, Clock, MoreHorizontal } from "lucide-react";
-import { PageHeader, SectionCard, StatTile, Avatar, Pill } from "@/components/medflow/ui";
+import { PageHeader, SectionCard, StatTile, Avatar, Pill, DemoBanner } from "@/components/medflow/ui";
 
 const STATS = [
   { label: "Total Staff", value: "48", icon: <UsersRound size={18} />, tone: "primary", delta: 4 },
@@ -28,6 +28,8 @@ export default function StaffPage() {
         <button className="mf-btn mf-btn-outline"><ShieldCheck size={16} /> Roles</button>
         <button className="mf-btn mf-btn-primary"><Plus size={16} /> Add Staff</button>
       </PageHeader>
+
+      <DemoBanner feature="Staff and role management" />
 
       <div className="mf-stagger grid grid-cols-2 gap-4 lg:grid-cols-4">
         {STATS.map((s) => <StatTile key={s.label} {...s} tone={s.tone as any} />)}

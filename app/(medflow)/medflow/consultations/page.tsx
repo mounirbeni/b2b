@@ -6,7 +6,7 @@ import {
   Sparkles, Pill, FlaskConical, Scan, FileCheck, CalendarPlus, Building2, Clock,
   ChevronRight, Save, Play, User,
 } from "lucide-react";
-import { Avatar, SectionCard, Pill as Chip } from "@/components/medflow/ui";
+import { Avatar, SectionCard, Pill as Chip, DemoBanner } from "@/components/medflow/ui";
 
 const VITALS = [
   { label: "HR", value: "72", icon: <HeartPulse size={14} />, tone: "var(--mf-error)" },
@@ -41,6 +41,8 @@ export default function ConsultationsPage() {
 
   return (
     <div className="space-y-5">
+      <DemoBanner feature="Clinical notes, vitals and SOAP records" />
+
       {/* Session bar */}
       <div className="mf-card flex flex-wrap items-center gap-3 px-5 py-3.5">
         <Avatar initials="EF" color="#2563eb" size={44} />

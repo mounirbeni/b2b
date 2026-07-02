@@ -24,7 +24,7 @@ test("clinic session is bounced away from patient area and vice versa", async ({
     email: `clinic-${suffix}@e2e.test`,
     phone: testPhone(suffix, 1),
   });
-  await page.waitForURL("/dashboard", { timeout: 15000 });
+  await page.waitForURL("**/medflow/dashboard", { timeout: 15000 });
 
   // Header reflects the logged-in clinic session.
   await page.goto("/");
@@ -63,9 +63,9 @@ test("existing clinic feature (/patients) is not shadowed by the /patient prefix
     email: `clinic-patients-${suffix}@e2e.test`,
     phone: testPhone(suffix, 3),
   });
-  await page.waitForURL("/dashboard", { timeout: 15000 });
+  await page.waitForURL("**/medflow/dashboard", { timeout: 15000 });
 
   await page.goto("/patients");
-  await expect(page).toHaveURL(/\/patients$/);
-  await expect(page.getByRole("heading", { name: "المرضى" })).toBeVisible();
+  await expect(page).toHaveURL(/\/medflow\/patients$/);
+  await expect(page.getByRole("heading", { name: "Patients" })).toBeVisible();
 });

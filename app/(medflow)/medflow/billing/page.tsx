@@ -3,7 +3,7 @@ import {
   MoreHorizontal, Printer, Receipt,
 } from "lucide-react";
 import { invoices } from "@/lib/medflow/data";
-import { Avatar, StatTile, PageHeader, Pill, SectionCard } from "@/components/medflow/ui";
+import { Avatar, StatTile, PageHeader, Pill, SectionCard, DemoBanner } from "@/components/medflow/ui";
 import { AreaChart } from "@/components/medflow/charts";
 import { revenueSeries } from "@/lib/medflow/data";
 
@@ -31,6 +31,8 @@ export default function BillingPage() {
         <button className="mf-btn mf-btn-outline"><Download size={16} /> Export</button>
         <button className="mf-btn mf-btn-primary"><Plus size={16} /> New Invoice</button>
       </PageHeader>
+
+      <DemoBanner feature="Billing and invoicing" />
 
       <div className="mf-stagger grid grid-cols-2 gap-4 lg:grid-cols-4">
         {STATS.map((s) => <StatTile key={s.label} label={s.label} value={s.value} icon={s.icon} tone={s.tone as any} delta={s.delta} invertDelta={(s as any).invert} />)}

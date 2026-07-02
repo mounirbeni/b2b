@@ -5,6 +5,22 @@ export function cx(...c: (string | false | null | undefined)[]) {
   return c.filter(Boolean).join(" ");
 }
 
+/** Shown on modules with no backing database model yet (Billing, Lab, Staff, etc.) —
+ * makes clear the screen is a design preview with sample data, not live clinic data. */
+export function DemoBanner({ feature }: { feature: string }) {
+  return (
+    <div
+      className="mf-animate-in flex items-center gap-3 rounded-2xl border px-4 py-3"
+      style={{ borderColor: "color-mix(in srgb, var(--mf-info) 30%, var(--mf-border))", background: "var(--mf-info-soft)" }}
+    >
+      <span className="mf-chip" style={{ background: "var(--mf-info)", color: "#fff" }}>Preview</span>
+      <span className="text-[13px]" style={{ color: "var(--mf-text)" }}>
+        {feature} isn't tracked in your clinic's data yet — this screen shows sample data to preview the design.
+      </span>
+    </div>
+  );
+}
+
 /* Avatar with gradient-tinted initials */
 export function Avatar({
   initials,

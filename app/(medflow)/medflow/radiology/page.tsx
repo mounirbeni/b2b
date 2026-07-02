@@ -1,5 +1,5 @@
 import { Scan, Plus, Upload, Brain, Bone, Waves, Activity, Search, MessageSquare } from "lucide-react";
-import { PageHeader, SectionCard, StatTile, Avatar, Pill } from "@/components/medflow/ui";
+import { PageHeader, SectionCard, StatTile, Avatar, Pill, DemoBanner } from "@/components/medflow/ui";
 
 const MODALITIES = [
   { label: "MRI", icon: <Brain size={20} />, count: 6, tone: "var(--mf-primary)" },
@@ -22,6 +22,8 @@ export default function RadiologyPage() {
         <button className="mf-btn mf-btn-outline"><Upload size={16} /> Upload Study</button>
         <button className="mf-btn mf-btn-primary"><Plus size={16} /> New Request</button>
       </PageHeader>
+
+      <DemoBanner feature="Radiology imaging requests" />
 
       <div className="mf-stagger grid grid-cols-2 gap-4 lg:grid-cols-4">
         {MODALITIES.map((m) => (

@@ -3,16 +3,17 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import {
   LayoutDashboard, CalendarDays, Users, Stethoscope, ConciergeBell, CalendarRange,
   ClipboardList, FileText, Pill, FlaskConical, Scan, CreditCard, Boxes, BarChart3,
   UsersRound, MessageSquare, Settings, LifeBuoy, Search, Bell, Sun, Moon, Menu, X,
-  Plus, Sparkles, ChevronsLeft, Command, ArrowRight, Check, LogOut, User, ChevronDown,
+  Plus, Sparkles, ChevronsLeft, Command, ArrowRight, Check, LogOut, ChevronDown,
 } from "lucide-react";
-import { searchIndex, notifications as notifData } from "@/lib/medflow/data";
+import { notifications as notifData } from "@/lib/medflow/data";
 import { Avatar, cx } from "@/components/medflow/ui";
 
-type NavItem = { href: string; label: string; icon: React.ComponentType<{ size?: number | string; strokeWidth?: number | string }>; badge?: string };
+type NavItem = { href: string; label: string; icon: React.ComponentType<{ size?: number | string; strokeWidth?: number | string }>; badgeKey?: "today" | "waiting"; live?: boolean };
 type NavGroup = { label: string; items: NavItem[] };
 
 const NAV: NavGroup[] = [
@@ -20,15 +21,15 @@ const NAV: NavGroup[] = [
     label: "Overview",
     items: [
       { href: "/medflow/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/medflow/appointments", label: "Appointments", icon: CalendarDays, badge: "38" },
+      { href: "/medflow/appointments", label: "Appointments", icon: CalendarDays, badgeKey: "today" },
       { href: "/medflow/calendar", label: "Calendar", icon: CalendarRange },
-      { href: "/medflow/reception", label: "Reception", icon: ConciergeBell, badge: "6" },
+      { href: "/medflow/reception", label: "Reception", icon: ConciergeBell, badgeKey: "waiting" },
     ],
   },
   {
     label: "Clinical",
     items: [
-      { href: "/medflow/patients", label: "Patients", icon: Users },
+      { href: "/medflow/patients", label: "Patients", icon: Users, live: true },
       { href: "/medflow/doctors", label: "Doctors", icon: Stethoscope },
       { href: "/medflow/consultations", label: "Consultations", icon: ClipboardList },
       { href: "/medflow/records", label: "Medical Records", icon: FileText },
@@ -42,15 +43,15 @@ const NAV: NavGroup[] = [
     items: [
       { href: "/medflow/billing", label: "Billing", icon: CreditCard },
       { href: "/medflow/inventory", label: "Inventory", icon: Boxes },
-      { href: "/medflow/reports", label: "Reports", icon: BarChart3 },
+      { href: "/medflow/reports", label: "Reports", icon: BarChart3, live: true },
       { href: "/medflow/staff", label: "Staff", icon: UsersRound },
-      { href: "/medflow/messages", label: "Messages", icon: MessageSquare, badge: "3" },
+      { href: "/medflow/messages", label: "Messages", icon: MessageSquare },
     ],
   },
   {
     label: "System",
     items: [
-      { href: "/medflow/settings", label: "Settings", icon: Settings },
+      { href: "/settings", label: "Settings", icon: Settings, live: true },
       { href: "/medflow/help", label: "Help & Support", icon: LifeBuoy },
     ],
   },
@@ -87,24 +88,54 @@ function useTheme() {
 }
 
 /* ---------------- Command Palette ---------------- */
+type PaletteResult = { type: string; label: string; sub: string; href: string };
+
 function CommandPalette({ open, onClose }: { open: boolean; onClose: () => void }) {
   const router = useRouter();
   const [q, setQ] = React.useState("");
   const [active, setActive] = React.useState(0);
+  const [patientResults, setPatientResults] = React.useState<PaletteResult[]>([]);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  const results = React.useMemo(() => {
+  const pageMatches = React.useMemo(() => {
     const query = q.trim().toLowerCase();
     const pages = ALL_ITEMS.map((i) => ({ type: "Navigate", label: i.label, sub: i.href, href: i.href }));
-    const pool = [...pages, ...searchIndex];
     if (!query) return pages.slice(0, 6);
-    return pool.filter((r) => r.label.toLowerCase().includes(query) || r.sub.toLowerCase().includes(query)).slice(0, 8);
+    return pages.filter((r) => r.label.toLowerCase().includes(query) || r.sub.toLowerCase().includes(query));
   }, [q]);
+
+  // Live patient search against the real API — same endpoint the Patients page uses.
+  React.useEffect(() => {
+    const query = q.trim();
+    if (query.length < 2) {
+      setPatientResults([]);
+      return;
+    }
+    const ctrl = new AbortController();
+    const t = setTimeout(() => {
+      fetch(`/api/patients?search=${encodeURIComponent(query)}`, { signal: ctrl.signal })
+        .then((r) => (r.ok ? r.json() : { data: [] }))
+        .then((json) => {
+          const rows = (json.data ?? []) as { id: string; name: string; phone: string }[];
+          setPatientResults(
+            rows.slice(0, 5).map((p) => ({ type: "Patient", label: p.name, sub: p.phone, href: `/medflow/patients/${p.id}` }))
+          );
+        })
+        .catch(() => {});
+    }, 220);
+    return () => {
+      clearTimeout(t);
+      ctrl.abort();
+    };
+  }, [q]);
+
+  const results = React.useMemo(() => [...patientResults, ...pageMatches].slice(0, 8), [patientResults, pageMatches]);
 
   React.useEffect(() => {
     if (open) {
       setQ("");
       setActive(0);
+      setPatientResults([]);
       setTimeout(() => inputRef.current?.focus(), 40);
     }
   }, [open]);
@@ -132,7 +163,7 @@ function CommandPalette({ open, onClose }: { open: boolean; onClose: () => void 
             ref={inputRef}
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search patients, appointments, invoices, pages…"
+            placeholder="Search patients or pages…"
             className="h-14 flex-1 bg-transparent text-[15px] outline-none"
             style={{ color: "var(--mf-text)" }}
           />
@@ -164,7 +195,7 @@ function CommandPalette({ open, onClose }: { open: boolean; onClose: () => void 
         <div className="flex items-center gap-4 border-t px-4 py-2.5 text-[11px]" style={{ borderColor: "var(--mf-border)", color: "var(--mf-text-3)" }}>
           <span className="flex items-center gap-1"><kbd className="rounded border px-1" style={{ borderColor: "var(--mf-border)" }}>↑↓</kbd> navigate</span>
           <span className="flex items-center gap-1"><kbd className="rounded border px-1" style={{ borderColor: "var(--mf-border)" }}>↵</kbd> open</span>
-          <span className="ml-auto flex items-center gap-1"><Sparkles size={12} style={{ color: "var(--mf-primary)" }} /> AI actions available</span>
+          <span className="ml-auto flex items-center gap-1"><Search size={12} style={{ color: "var(--mf-primary)" }} /> Live patient search</span>
         </div>
       </div>
     </div>
@@ -189,7 +220,7 @@ function Notifications() {
         <div className="mf-card mf-animate-scale absolute right-0 top-12 z-50 w-[360px] overflow-hidden" style={{ boxShadow: "var(--mf-shadow-lg)" }}>
           <div className="flex items-center justify-between border-b px-4 py-3" style={{ borderColor: "var(--mf-border)" }}>
             <span className="text-sm font-semibold" style={{ color: "var(--mf-text)" }}>Notifications</span>
-            <span className="mf-chip" style={{ background: "var(--mf-primary-soft)", color: "var(--mf-primary)" }}>{unread} new</span>
+            <span className="mf-chip" style={{ background: "var(--mf-surface-2)", color: "var(--mf-text-2)" }}>Preview</span>
           </div>
           <div className="max-h-[340px] overflow-y-auto mf-thin-scroll">
             {notifData.map((n) => (
@@ -213,33 +244,38 @@ function Notifications() {
 }
 
 /* ---------------- User menu ---------------- */
-function UserMenu() {
+function UserMenu({ userName, clinicName }: { userName: string; clinicName: string }) {
   const [open, setOpen] = React.useState(false);
   const ref = useClickOutside(() => setOpen(false));
+  const initials = userName.trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join("").toUpperCase() || "DR";
   return (
     <div className="relative" ref={ref}>
       <button onClick={() => setOpen((o) => !o)} className="flex items-center gap-2 rounded-xl p-1 pr-2 transition-colors hover:bg-[var(--mf-surface-hover)]">
-        <Avatar initials="DR" color="#2563eb" size={32} />
+        <Avatar initials={initials} color="#2563eb" size={32} />
         <div className="hidden text-left leading-tight md:block">
-          <p className="text-[13px] font-semibold" style={{ color: "var(--mf-text)" }}>Dr. Reception</p>
-          <p className="text-[11px]" style={{ color: "var(--mf-text-3)" }}>Front Desk</p>
+          <p className="text-[13px] font-semibold" style={{ color: "var(--mf-text)" }}>{userName}</p>
+          <p className="text-[11px]" style={{ color: "var(--mf-text-3)" }}>{clinicName}</p>
         </div>
         <ChevronDown size={15} style={{ color: "var(--mf-text-3)" }} />
       </button>
       {open && (
         <div className="mf-card mf-animate-scale absolute right-0 top-12 z-50 w-56 overflow-hidden p-1.5" style={{ boxShadow: "var(--mf-shadow-lg)" }}>
           <div className="px-3 py-2.5">
-            <p className="text-sm font-semibold" style={{ color: "var(--mf-text)" }}>Riverside Medical</p>
-            <p className="text-xs" style={{ color: "var(--mf-text-3)" }}>Enterprise · 24 seats</p>
+            <p className="text-sm font-semibold" style={{ color: "var(--mf-text)" }}>{clinicName}</p>
           </div>
           <div className="my-1 h-px" style={{ background: "var(--mf-border)" }} />
-          {[{ icon: User, label: "My profile" }, { icon: Settings, label: "Preferences" }, { icon: LifeBuoy, label: "Help center" }].map((m) => (
-            <button key={m.label} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] transition-colors hover:bg-[var(--mf-surface-hover)]" style={{ color: "var(--mf-text-2)" }}>
-              <m.icon size={16} /> {m.label}
-            </button>
-          ))}
+          <Link href="/settings" className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] transition-colors hover:bg-[var(--mf-surface-hover)]" style={{ color: "var(--mf-text-2)" }}>
+            <Settings size={16} /> Clinic settings
+          </Link>
+          <Link href="/medflow/help" className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] transition-colors hover:bg-[var(--mf-surface-hover)]" style={{ color: "var(--mf-text-2)" }}>
+            <LifeBuoy size={16} /> Help center
+          </Link>
           <div className="my-1 h-px" style={{ background: "var(--mf-border)" }} />
-          <button className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] transition-colors hover:bg-[var(--mf-error-soft)]" style={{ color: "var(--mf-error)" }}>
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] transition-colors hover:bg-[var(--mf-error-soft)]"
+            style={{ color: "var(--mf-error)" }}
+          >
             <LogOut size={16} /> Sign out
           </button>
         </div>
@@ -249,7 +285,15 @@ function UserMenu() {
 }
 
 /* ---------------- Sidebar ---------------- */
-function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
+function SidebarContent({
+  collapsed,
+  onNavigate,
+  badges,
+}: {
+  collapsed: boolean;
+  onNavigate?: () => void;
+  badges: { today: number; waiting: number };
+}) {
   const pathname = usePathname();
   return (
     <>
@@ -275,6 +319,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
               {group.items.map((item) => {
                 const active = pathname === item.href || pathname.startsWith(item.href + "/");
                 const Icon = item.icon;
+                const badgeValue = item.badgeKey === "today" ? badges.today : item.badgeKey === "waiting" ? badges.waiting : undefined;
                 return (
                   <Link
                     key={item.href}
@@ -290,9 +335,9 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
                     {active && !collapsed && <span className="absolute left-0 top-1/2 h-5 -translate-y-1/2 rounded-r-full" style={{ width: 3, background: "var(--mf-primary)" }} />}
                     <Icon size={18} strokeWidth={active ? 2.3 : 2} />
                     {!collapsed && <span className="flex-1">{item.label}</span>}
-                    {!collapsed && item.badge && (
-                      <span className="rounded-md px-1.5 py-0.5 text-[10px] font-semibold" style={{ background: active ? "var(--mf-primary)" : "var(--mf-surface-hover)", color: active ? "#fff" : "var(--mf-text-2)" }}>
-                        {item.badge}
+                    {!collapsed && badgeValue !== undefined && (
+                      <span className="rounded-md px-1.5 py-0.5 text-[10px] font-semibold mf-nums" style={{ background: active ? "var(--mf-primary)" : "var(--mf-surface-hover)", color: active ? "#fff" : "var(--mf-text-2)" }}>
+                        {badgeValue}
                       </span>
                     )}
                   </Link>
@@ -311,8 +356,8 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
               <div className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold" style={{ color: "var(--mf-primary)" }}>
                 <Sparkles size={15} /> MedFlow AI
               </div>
-              <p className="text-[12px] leading-relaxed" style={{ color: "var(--mf-text-2)" }}>Ask the assistant to summarize a chart, draft notes, or optimize today’s schedule.</p>
-              <button className="mf-btn mf-btn-primary mf-btn-sm mt-3 w-full">Open Assistant</button>
+              <p className="text-[12px] leading-relaxed" style={{ color: "var(--mf-text-2)" }}>AI note-drafting and schedule optimization are coming soon — this preview shows where they'll live.</p>
+              <button disabled className="mf-btn mf-btn-outline mf-btn-sm mt-3 w-full opacity-70">Coming soon</button>
             </div>
           </div>
         </div>
@@ -322,12 +367,25 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
 }
 
 /* ---------------- Shell ---------------- */
-export function Shell({ children }: { children: React.ReactNode }) {
+export function Shell({
+  children,
+  clinicName,
+  userName,
+  todayCount,
+  waitingCount,
+}: {
+  children: React.ReactNode;
+  clinicName: string;
+  userName: string;
+  todayCount: number;
+  waitingCount: number;
+}) {
   const { theme, toggle } = useTheme();
   const [collapsed, setCollapsed] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [paletteOpen, setPaletteOpen] = React.useState(false);
   const pathname = usePathname();
+  const badges = { today: todayCount, waiting: waitingCount };
 
   React.useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -352,7 +410,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           className="sticky top-0 hidden h-screen shrink-0 flex-col border-r transition-[width] duration-300 lg:flex"
           style={{ width: collapsed ? 76 : 264, background: "var(--mf-surface)", borderColor: "var(--mf-border)" }}
         >
-          <SidebarContent collapsed={collapsed} />
+          <SidebarContent collapsed={collapsed} badges={badges} />
         </aside>
 
         {/* Mobile drawer */}
@@ -361,7 +419,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <div className="mf-animate-fade absolute inset-0" style={{ background: "rgba(2,6,23,0.5)" }} onClick={() => setMobileOpen(false)} />
             <aside className="absolute left-0 top-0 flex h-full w-[280px] flex-col border-r" style={{ background: "var(--mf-surface)", borderColor: "var(--mf-border)", animation: "mf-fade 0.2s ease" }}>
               <button className="mf-btn mf-btn-ghost mf-btn-icon absolute right-2 top-3" onClick={() => setMobileOpen(false)}><X size={18} /></button>
-              <SidebarContent collapsed={false} onNavigate={() => setMobileOpen(false)} />
+              <SidebarContent collapsed={false} onNavigate={() => setMobileOpen(false)} badges={badges} />
             </aside>
           </div>
         )}
@@ -394,13 +452,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
             </button>
 
             <div className="flex items-center gap-1 md:ml-2">
-              <button className="mf-btn mf-btn-primary mf-btn-sm hidden sm:flex"><Plus size={16} /> New</button>
+              <Link href="/medflow/appointments" className="mf-btn mf-btn-primary mf-btn-sm hidden sm:flex"><Plus size={16} /> New</Link>
               <button className="mf-btn mf-btn-ghost mf-btn-icon" onClick={toggle} aria-label="Toggle theme">
                 {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
               </button>
               <Notifications />
               <div className="mx-1 hidden h-6 w-px sm:block" style={{ background: "var(--mf-border)" }} />
-              <UserMenu />
+              <UserMenu userName={userName} clinicName={clinicName} />
             </div>
           </header>
 

@@ -5,7 +5,7 @@ import { authConfig } from "@/lib/auth.config";
 const { auth } = NextAuth(authConfig);
 
 // Public marketplace pages, viewable whether logged in or not.
-const OPEN_PATHS = ["/", "/search", "/clinics", "/terms", "/privacy", "/medflow"];
+const OPEN_PATHS = ["/", "/search", "/clinics", "/terms", "/privacy"];
 
 // Only reachable when signed out of the matching realm.
 const CLINIC_AUTH_ONLY_PATHS = ["/login", "/register"];
@@ -24,7 +24,7 @@ function matchesPath(pathname: string, prefix: string) {
 /** Where a signed-in user actually belongs, used to avoid bouncing them through a login
  * page for a different role that would just bounce them again. */
 function homeFor(role: Role): string {
-  if (role === "clinic") return "/dashboard";
+  if (role === "clinic") return "/medflow/dashboard";
   if (role === "patient") return "/patient/appointments";
   if (role === "admin") return "/admin";
   return "/login";

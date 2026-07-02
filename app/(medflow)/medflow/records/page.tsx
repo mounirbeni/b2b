@@ -2,7 +2,7 @@ import {
   FileText, Search, Stethoscope, Scissors, HeartPulse, Syringe, Users, AlertTriangle,
   Activity, FileImage, Paperclip, Plus, ChevronRight,
 } from "lucide-react";
-import { PageHeader, SectionCard, Avatar, Pill } from "@/components/medflow/ui";
+import { PageHeader, SectionCard, Avatar, Pill, DemoBanner } from "@/components/medflow/ui";
 
 const CATEGORIES = [
   { label: "Diagnoses", count: 14, icon: <Stethoscope size={18} />, tone: "var(--mf-primary)" },
@@ -32,6 +32,8 @@ export default function RecordsPage() {
         </div>
         <button className="mf-btn mf-btn-primary"><Plus size={16} /> New Record</button>
       </PageHeader>
+
+      <DemoBanner feature="Full electronic health records" />
 
       {/* Patient context */}
       <div className="mf-card flex items-center gap-3 px-5 py-4">

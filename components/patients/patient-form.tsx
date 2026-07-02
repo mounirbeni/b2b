@@ -54,7 +54,7 @@ export function PatientForm({ patient }: PatientFormProps) {
       if (!res.ok) throw new Error(data.error ?? "فشل حفظ المريض");
 
       toast.success(isEdit ? "تم تحديث بيانات المريض" : "تم إضافة المريض بنجاح");
-      router.push(isEdit ? `/patients/${patient!.id}` : `/patients/${data.id}`);
+      router.push(`/medflow/patients/${isEdit ? patient!.id : data.id}`);
       router.refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "حدث خطأ ما");

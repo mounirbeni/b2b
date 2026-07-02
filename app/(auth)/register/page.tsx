@@ -63,7 +63,7 @@ export default function RegisterPage() {
     }
 
     toast.success("تم إنشاء الحساب بنجاح");
-    router.push("/dashboard");
+    router.push("/medflow/dashboard");
     router.refresh();
   }
 

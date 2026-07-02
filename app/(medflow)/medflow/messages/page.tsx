@@ -4,7 +4,7 @@ import * as React from "react";
 import {
   MessageSquare, Search, Send, Phone, Mail, Smartphone, Plus, Sparkles, Paperclip, Zap,
 } from "lucide-react";
-import { PageHeader, Avatar, Pill, SectionCard } from "@/components/medflow/ui";
+import { PageHeader, Avatar, Pill, SectionCard, DemoBanner } from "@/components/medflow/ui";
 
 const CHANNELS = [
   { label: "SMS", icon: <Smartphone size={14} />, tone: "primary" as const },
@@ -37,6 +37,8 @@ export default function MessagesPage() {
         <button className="mf-btn mf-btn-outline"><Zap size={16} /> Automations</button>
         <button className="mf-btn mf-btn-primary"><Plus size={16} /> Broadcast</button>
       </PageHeader>
+
+      <DemoBanner feature="Two-way conversation threads (WhatsApp reminders are real — see an appointment's Send Reminder button)" />
 
       <div className="mf-card grid grid-cols-1 overflow-hidden p-0 md:grid-cols-[300px_1fr] lg:grid-cols-[300px_1fr_260px]" style={{ height: "68vh", minHeight: 520 }}>
         {/* Threads */}

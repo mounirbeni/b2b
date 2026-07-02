@@ -1,190 +1,205 @@
 import {
-  CalendarDays, Clock, Stethoscope, CheckCircle2, DollarSign, TrendingUp, XCircle,
-  Hourglass, ArrowUpRight, Plus, UserPlus, CalendarPlus, Receipt, FlaskConical,
-  Pill, CreditCard, UserCircle2, Activity, ChevronRight, Sparkles,
+  CalendarDays, Clock, CheckCircle2, XCircle, Users, UserPlus2,
+  ArrowUpRight, Plus, UserPlus, CalendarPlus, Settings as SettingsIcon,
+  ChevronRight, AlertTriangle,
 } from "lucide-react";
-import {
-  kpis, appointments, activities, doctors, revenueSeries, apptTrend, patientGrowth, doctorShare,
-} from "@/lib/medflow/data";
-import { Avatar, Card, SectionCard, StatTile, StatusPill, Pill as Chip, ProgressBar } from "@/components/medflow/ui";
-import { AreaChart, BarChart, DonutChart, Sparkline } from "@/components/medflow/charts";
+import { requireClinicSession } from "@/lib/auth-guard";
+import { getClinic, getDashboardData, initialsOf, colorFor } from "@/lib/medflow/live";
+import { formatDateArabic } from "@/lib/date-utils";
+import { Avatar, SectionCard, StatTile } from "@/components/medflow/ui";
+import { BarChart, DonutChart } from "@/components/medflow/charts";
+import { RealStatusPill, REAL_STATUS_META } from "@/lib/medflow/real-status";
+import type { Status } from "@/types";
 
-const KPI_ICON: Record<string, React.ReactNode> = {
-  calendar: <CalendarDays size={18} />, clock: <Clock size={18} />, stethoscope: <Stethoscope size={18} />,
-  check: <CheckCircle2 size={18} />, dollar: <DollarSign size={18} />, trend: <TrendingUp size={18} />,
-  x: <XCircle size={18} />, hourglass: <Hourglass size={18} />,
-};
-const SPARK_COLOR: Record<string, string> = {
-  primary: "var(--mf-primary)", success: "var(--mf-success)", warning: "var(--mf-warning)", error: "var(--mf-error)", info: "var(--mf-info)",
-};
-const ACT_ICON: Record<string, React.ReactNode> = {
-  check: <CheckCircle2 size={15} />, user: <UserPlus size={15} />, flask: <FlaskConical size={15} />,
-  card: <CreditCard size={15} />, x: <XCircle size={15} />, pill: <Pill size={15} />,
-};
-const ACT_TONE: Record<string, { fg: string; bg: string }> = {
-  primary: { fg: "var(--mf-primary)", bg: "var(--mf-primary-soft)" },
-  success: { fg: "var(--mf-success)", bg: "var(--mf-success-soft)" },
-  warning: { fg: "var(--mf-warning)", bg: "var(--mf-warning-soft)" },
-  error: { fg: "var(--mf-error)", bg: "var(--mf-error-soft)" },
-  info: { fg: "var(--mf-info)", bg: "var(--mf-info-soft)" },
+const CLINIC_STATUS_MESSAGE: Record<string, string> = {
+  PENDING: "عيادتك قيد المراجعة من طرف الإدارة ولن تظهر في الدليل العام حتى تتم الموافقة عليها.",
+  REJECTED: "تم رفض عيادتك من طرف الإدارة. تواصل معنا لمزيد من التفاصيل.",
+  SUSPENDED: "تم تعليق عيادتك مؤقتاً ولا تظهر حالياً في الدليل العام.",
 };
 
 const QUICK_ACTIONS = [
-  { label: "New Appointment", icon: <CalendarPlus size={18} />, tone: "primary" },
-  { label: "Register Patient", icon: <UserPlus size={18} />, tone: "success" },
-  { label: "Create Invoice", icon: <Receipt size={18} />, tone: "info" },
-  { label: "Walk-in Check-in", icon: <UserCircle2 size={18} />, tone: "warning" },
+  { label: "New Appointment", href: "/medflow/appointments", icon: <CalendarPlus size={18} />, tone: "primary" as const },
+  { label: "Register Patient", href: "/patients/new", icon: <UserPlus size={18} />, tone: "success" as const },
+  { label: "Reception Queue", href: "/medflow/reception", icon: <Users size={18} />, tone: "info" as const },
+  { label: "Clinic Settings", href: "/settings", icon: <SettingsIcon size={18} />, tone: "warning" as const },
 ];
 
-export default function DashboardPage() {
+const TONE: Record<string, { fg: string; bg: string }> = {
+  primary: { fg: "var(--mf-primary)", bg: "var(--mf-primary-soft)" },
+  success: { fg: "var(--mf-success)", bg: "var(--mf-success-soft)" },
+  warning: { fg: "var(--mf-warning)", bg: "var(--mf-warning-soft)" },
+  info: { fg: "var(--mf-info)", bg: "var(--mf-info-soft)" },
+};
+
+export default async function DashboardPage() {
+  const session = await requireClinicSession();
+  const clinicId = session!.user.clinicId;
+
+  const [clinic, data] = await Promise.all([getClinic(clinicId), getDashboardData(clinicId)]);
+
+  const donutData = (Object.keys(REAL_STATUS_META) as Status[])
+    .map((s) => ({ label: REAL_STATUS_META[s].label, v: data.monthByStatus[s], color: REAL_STATUS_META[s].dot }))
+    .filter((d) => d.v > 0);
+  const monthTotal = donutData.reduce((sum, d) => sum + d.v, 0);
+
+  const activity = [
+    ...data.recentPatients.map((p) => ({
+      key: `p-${p.id}`,
+      text: "New patient registered",
+      meta: p.name,
+      time: p.createdAt,
+      tone: "primary" as const,
+      icon: <UserPlus2 size={15} />,
+    })),
+    ...data.recentAppointments
+      .filter((a) => a.status === "COMPLETED" || a.status === "CANCELLED")
+      .map((a) => ({
+        key: `a-${a.id}`,
+        text: a.status === "COMPLETED" ? "Appointment completed for" : "Appointment cancelled for",
+        meta: a.patient.name,
+        time: a.updatedAt,
+        tone: a.status === "COMPLETED" ? ("success" as const) : ("error" as const),
+        icon: a.status === "COMPLETED" ? <CheckCircle2 size={15} /> : <XCircle size={15} />,
+      })),
+  ]
+    .sort((a, b) => b.time.getTime() - a.time.getTime())
+    .slice(0, 6);
+
   return (
     <div className="space-y-6">
+      {clinic && clinic.status !== "APPROVED" && (
+        <div
+          className="mf-animate-in flex items-center gap-3 rounded-2xl border px-4 py-3"
+          style={{ borderColor: "color-mix(in srgb, var(--mf-warning) 35%, var(--mf-border))", background: "var(--mf-warning-soft)" }}
+        >
+          <AlertTriangle size={18} style={{ color: "var(--mf-warning)" }} />
+          <span className="text-[13px]" style={{ color: "var(--mf-text)" }}>
+            {CLINIC_STATUS_MESSAGE[clinic.status] ?? clinic.status}
+          </span>
+        </div>
+      )}
+
       {/* Hero */}
       <div className="mf-animate-in relative overflow-hidden rounded-3xl border p-6 md:p-7" style={{ borderColor: "var(--mf-border)", background: "var(--mf-surface)" }}>
         <div className="absolute inset-0 mf-mesh" />
         <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="mb-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-medium" style={{ background: "var(--mf-surface-2)", color: "var(--mf-text-2)" }}>
-              <span className="mf-dot" style={{ background: "var(--mf-success)" }} /> Thursday, July 2 · 2026
+              <span className="mf-dot" style={{ background: "var(--mf-success)" }} /> {formatDateArabic(new Date())}
             </div>
             <h1 className="text-[26px] font-bold tracking-tight md:text-[30px]" style={{ color: "var(--mf-text)" }}>
-              Good morning, Riverside Medical 👋
+              {clinic?.name ?? "Your Clinic"}
             </h1>
             <p className="mt-1 text-[15px]" style={{ color: "var(--mf-text-2)" }}>
-              You have <b style={{ color: "var(--mf-text)" }}>38 appointments</b> today · 6 patients waiting · 4 in consultation.
+              You have <b style={{ color: "var(--mf-text)" }}>{data.counts.todayTotal} appointments</b> today ·{" "}
+              {data.counts.waiting} waiting · {data.counts.inConsultation} in consultation.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2.5">
-            <button className="mf-btn mf-btn-outline"><Sparkles size={16} style={{ color: "var(--mf-primary)" }} /> AI Daily Brief</button>
-            <button className="mf-btn mf-btn-primary"><Plus size={16} /> New Appointment</button>
+            <a href="/medflow/appointments" className="mf-btn mf-btn-primary"><Plus size={16} /> New Appointment</a>
           </div>
         </div>
       </div>
 
       {/* KPI grid */}
       <div className="mf-stagger grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {kpis.map((k) => (
-          <StatTile
-            key={k.key}
-            label={k.label}
-            value={k.value}
-            tone={k.tone as any}
-            delta={k.delta}
-            invertDelta={k.key === "wait" || k.key === "cancelled"}
-            icon={KPI_ICON[k.icon]}
-            spark={<Sparkline data={k.spark} color={SPARK_COLOR[k.tone]} width={92} height={34} />}
-          />
-        ))}
+        <StatTile label="Today's Appointments" value={String(data.counts.todayTotal)} tone="primary" icon={<CalendarDays size={18} />} />
+        <StatTile label="Patients Waiting" value={String(data.counts.waiting)} tone="warning" icon={<Clock size={18} />} />
+        <StatTile label="In Consultation" value={String(data.counts.inConsultation)} tone="info" icon={<Users size={18} />} />
+        <StatTile label="Completed Today" value={String(data.counts.completed)} tone="success" icon={<CheckCircle2 size={18} />} />
+        <StatTile label="Cancelled Today" value={String(data.counts.cancelled)} tone="error" icon={<XCircle size={18} />} />
+        <StatTile label="No-show Today" value={String(data.counts.noShow)} tone="warning" icon={<AlertTriangle size={18} />} />
+        <StatTile label="Total Patients" value={data.counts.totalPatients.toLocaleString()} tone="primary" icon={<Users size={18} />} />
+        <StatTile label="New Patients This Month" value={String(data.counts.newPatientsThisMonth)} tone="success" icon={<UserPlus2 size={18} />} />
       </div>
 
       {/* Charts row */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <SectionCard
-          className="lg:col-span-2"
-          title="Revenue Analytics"
-          subtitle="Revenue vs. profit · last 6 months"
-          action={
-            <div className="flex items-center gap-3 text-[12px]">
-              <span className="flex items-center gap-1.5" style={{ color: "var(--mf-text-2)" }}><span className="mf-dot" style={{ background: "var(--mf-c1)" }} /> Revenue</span>
-              <span className="flex items-center gap-1.5" style={{ color: "var(--mf-text-2)" }}><span className="mf-dot" style={{ background: "var(--mf-c2)" }} /> Profit</span>
-            </div>
-          }
-        >
-          <AreaChart data={revenueSeries} />
+        <SectionCard title="Appointment Trends" subtitle="Bookings for the last 7 days" className="lg:col-span-2">
+          <BarChart data={data.trend} color="var(--mf-primary)" />
         </SectionCard>
 
-        <SectionCard title="Most Visited Doctors" subtitle="Share of visits this month">
-          <DonutChart data={doctorShare} centerLabel="1,284" centerSub="visits" />
+        <SectionCard title="Appointments by Status" subtitle="This month">
+          {monthTotal > 0 ? (
+            <DonutChart data={donutData} centerLabel={String(monthTotal)} centerSub="appointments" />
+          ) : (
+            <p className="py-10 text-center text-[13px]" style={{ color: "var(--mf-text-2)" }}>No appointments this month yet.</p>
+          )}
         </SectionCard>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <SectionCard title="Appointment Trends" subtitle="Bookings by day of week" action={<Chip tone="success" dot>+18% WoW</Chip>}>
-          <BarChart data={apptTrend} color="var(--mf-primary)" />
-        </SectionCard>
-        <SectionCard title="Patient Growth" subtitle="New patients · last 6 weeks" action={<Chip tone="primary" dot>+118 total</Chip>}>
-          <BarChart data={patientGrowth} color="var(--mf-secondary)" />
-        </SectionCard>
-      </div>
+      <SectionCard title="Patient Growth" subtitle="New patients registered · last 6 weeks">
+        <BarChart data={data.growth} color="var(--mf-secondary)" />
+      </SectionCard>
 
       {/* Quick actions */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {QUICK_ACTIONS.map((q) => {
-          const t = ACT_TONE[q.tone];
+          const t = TONE[q.tone];
           return (
-            <button key={q.label} className="mf-card mf-card-hover flex items-center gap-3 p-4 text-left">
+            <a key={q.label} href={q.href} className="mf-card mf-card-hover flex items-center gap-3 p-4 text-left">
               <span className="flex h-11 w-11 items-center justify-center rounded-2xl" style={{ color: t.fg, background: t.bg }}>{q.icon}</span>
               <span className="text-[14px] font-semibold" style={{ color: "var(--mf-text)" }}>{q.label}</span>
               <ArrowUpRight size={16} className="ml-auto" style={{ color: "var(--mf-text-3)" }} />
-            </button>
+            </a>
           );
         })}
       </div>
 
-      {/* Bottom three columns */}
+      {/* Bottom two columns */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Upcoming appointments */}
         <SectionCard
           className="lg:col-span-2"
-          title="Upcoming Appointments"
-          subtitle="Next patients in the queue"
+          title="Today's Appointments"
+          subtitle="All patients scheduled today"
           action={<a href="/medflow/appointments" className="mf-btn mf-btn-ghost mf-btn-sm">View all <ChevronRight size={15} /></a>}
           bodyClassName="px-0 pb-0"
         >
-          <div>
-            {appointments.slice(0, 6).map((a) => (
+          {data.todayAppointments.length === 0 ? (
+            <p className="px-5 py-10 text-center text-[13px]" style={{ color: "var(--mf-text-2)" }}>No appointments scheduled for today.</p>
+          ) : (
+            data.todayAppointments.slice(0, 8).map((a) => (
               <div key={a.id} className="flex items-center gap-3 border-t px-5 py-3 transition-colors hover:bg-[var(--mf-surface-hover)]" style={{ borderColor: "var(--mf-border-soft)" }}>
-                <Avatar initials={a.patientAvatar} color={a.patientColor} size={38} />
+                <Avatar initials={initialsOf(a.patient.name)} color={colorFor(a.patientId)} size={38} />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[14px] font-semibold" style={{ color: "var(--mf-text)" }}>{a.patient}</p>
-                  <p className="truncate text-[12px]" style={{ color: "var(--mf-text-2)" }}>{a.doctor} · {a.department} · Room {a.room}</p>
+                  <p className="truncate text-[14px] font-semibold" style={{ color: "var(--mf-text)" }}>{a.patient.name}</p>
+                  <p className="truncate text-[12px]" style={{ color: "var(--mf-text-2)" }}>{a.type} · {a.duration} min</p>
                 </div>
                 <div className="hidden text-right sm:block">
-                  <p className="text-[13px] font-semibold mf-nums" style={{ color: "var(--mf-text)" }}>{a.start}</p>
-                  <p className="text-[11px]" style={{ color: "var(--mf-text-3)" }}>{a.durationMin} min · {a.type}</p>
+                  <p className="text-[13px] font-semibold mf-nums" style={{ color: "var(--mf-text)" }}>
+                    {a.dateTime.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+                  </p>
                 </div>
-                <StatusPill status={a.status} live={a.status === "in-consultation"} />
+                <RealStatusPill status={a.status as Status} live={a.status === "IN_PROGRESS"} />
               </div>
-            ))}
-          </div>
+            ))
+          )}
         </SectionCard>
 
-        {/* Right rail: activity + doctor availability */}
-        <div className="space-y-6">
-          <SectionCard title="Recent Activity" bodyClassName="px-0 pb-2">
+        <SectionCard title="Recent Activity" bodyClassName="px-0 pb-2">
+          {activity.length === 0 ? (
+            <p className="px-5 py-10 text-center text-[13px]" style={{ color: "var(--mf-text-2)" }}>No recent activity yet.</p>
+          ) : (
             <div className="px-5">
               <div className="relative space-y-4 border-l pl-5" style={{ borderColor: "var(--mf-border)" }}>
-                {activities.slice(0, 5).map((ac) => {
-                  const t = ACT_TONE[ac.tone];
+                {activity.map((ac) => {
+                  const t = TONE[ac.tone];
                   return (
-                    <div key={ac.id} className="relative">
+                    <div key={ac.key} className="relative">
                       <span className="absolute -left-[27px] top-0 flex h-6 w-6 items-center justify-center rounded-full" style={{ color: t.fg, background: t.bg, boxShadow: "0 0 0 3px var(--mf-surface)" }}>
-                        {ACT_ICON[ac.icon]}
+                        {ac.icon}
                       </span>
                       <p className="text-[13px] leading-snug" style={{ color: "var(--mf-text-2)" }}>
                         {ac.text} <b style={{ color: "var(--mf-text)" }}>{ac.meta}</b>
                       </p>
-                      <p className="text-[11px]" style={{ color: "var(--mf-text-3)" }}>{ac.time}</p>
+                      <p className="text-[11px]" style={{ color: "var(--mf-text-3)" }}>{formatDateArabic(ac.time)}</p>
                     </div>
                   );
                 })}
               </div>
             </div>
-          </SectionCard>
-
-          <SectionCard title="Doctor Availability" bodyClassName="space-y-3">
-            {doctors.slice(0, 5).map((d) => (
-              <div key={d.id} className="flex items-center gap-3">
-                <Avatar initials={d.avatar} color={d.color} size={34} online={d.online} />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] font-semibold" style={{ color: "var(--mf-text)" }}>{d.name}</p>
-                  <div className="mt-1"><ProgressBar value={d.utilization} color={d.color} /></div>
-                </div>
-                <span className="text-[12px] font-semibold mf-nums" style={{ color: "var(--mf-text-2)" }}>{d.utilization}%</span>
-              </div>
-            ))}
-          </SectionCard>
-        </div>
+          )}
+        </SectionCard>
       </div>
     </div>
   );

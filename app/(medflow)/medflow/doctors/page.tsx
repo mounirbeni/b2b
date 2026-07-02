@@ -2,7 +2,7 @@ import {
   Stethoscope, Plus, Star, Users, Clock, Search, Calendar, TrendingUp, Award,
 } from "lucide-react";
 import { doctors } from "@/lib/medflow/data";
-import { Avatar, StatTile, PageHeader, Pill, ProgressBar, SectionCard } from "@/components/medflow/ui";
+import { Avatar, StatTile, PageHeader, Pill, ProgressBar, SectionCard, DemoBanner } from "@/components/medflow/ui";
 import { RadialGauge } from "@/components/medflow/charts";
 
 const STATS = [
@@ -24,6 +24,8 @@ export default function DoctorsPage() {
         </div>
         <button className="mf-btn mf-btn-primary"><Plus size={16} /> Add Doctor</button>
       </PageHeader>
+
+      <DemoBanner feature="Multi-doctor management" />
 
       <div className="mf-stagger grid grid-cols-2 gap-4 lg:grid-cols-4">
         {STATS.map((s) => <StatTile key={s.label} {...s} tone={s.tone as any} />)}

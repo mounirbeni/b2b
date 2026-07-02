@@ -20,7 +20,7 @@ test("admin approves a pending clinic and it becomes publicly bookable", async (
     email: `admin-review-${suffix}@e2e.test`,
     phone: testPhone(suffix, 1),
   });
-  await page.waitForURL("/dashboard", { timeout: 15000 });
+  await page.waitForURL("**/medflow/dashboard", { timeout: 15000 });
 
   await context.clearCookies();
   await page.goto("/search");
@@ -70,7 +70,7 @@ test("a clinic session is redirected away from /admin (to its own dashboard, not
     email: `not-admin-${suffix}@e2e.test`,
     phone: testPhone(suffix, 3),
   });
-  await page.waitForURL("/dashboard", { timeout: 15000 });
+  await page.waitForURL("**/medflow/dashboard", { timeout: 15000 });
 
   await page.goto("/admin");
   await expect(page).toHaveURL(/\/dashboard$/);

@@ -20,7 +20,7 @@ test("patient books a real slot, double-booking is rejected, clinic sees it", as
     email: clinicEmail,
     phone: testPhone(suffix, 1),
   });
-  await page.waitForURL("/dashboard", { timeout: 15000 });
+  await page.waitForURL("**/medflow/dashboard", { timeout: 15000 });
 
   // Approving a clinic is normally an admin-panel action (covered in admin.spec.ts) — here
   // we go straight to Prisma so this spec stays focused on the booking flow itself.
@@ -60,7 +60,7 @@ test("patient books a real slot, double-booking is rejected, clinic sees it", as
   await page.fill("#email", clinicEmail);
   await page.fill("#password", "password123");
   await page.click('button[type="submit"]');
-  await page.waitForURL("/dashboard", { timeout: 15000 });
+  await page.waitForURL("**/medflow/dashboard", { timeout: 15000 });
 
   const apiResult = await page.evaluate(
     async (dateStr) => (await fetch(`/api/appointments?date=${dateStr}`)).json(),
@@ -79,7 +79,7 @@ test("a PENDING (unapproved) clinic is not publicly bookable", async ({ page, co
     email: `pending-clinic-${suffix}@e2e.test`,
     phone: testPhone(suffix, 3),
   });
-  await page.waitForURL("/dashboard", { timeout: 15000 });
+  await page.waitForURL("**/medflow/dashboard", { timeout: 15000 });
   await expect(page.getByText("قيد المراجعة")).toBeVisible();
 
   await context.clearCookies();
