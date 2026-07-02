@@ -5,7 +5,7 @@ import { authConfig } from "@/lib/auth.config";
 const { auth } = NextAuth(authConfig);
 
 // Public marketplace pages, viewable whether logged in or not.
-const OPEN_PATHS = ["/", "/search", "/clinics", "/terms", "/privacy"];
+const OPEN_PATHS = ["/", "/search", "/clinics", "/terms", "/privacy", "/medflow"];
 
 // Only reachable when signed out of the matching realm.
 const CLINIC_AUTH_ONLY_PATHS = ["/login", "/register"];
