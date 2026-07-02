@@ -37,6 +37,19 @@ export default async function PublicLayout({ children }: { children: React.React
         </div>
       </header>
       <main className="mx-auto max-w-5xl p-4 md:p-6">{children}</main>
+      <footer className="border-t bg-white py-6">
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-4 text-sm text-muted-foreground sm:flex-row">
+          <p>© {new Date().getFullYear()} دليل العيادات</p>
+          <div className="flex items-center gap-4">
+            <Link href="/terms" className="hover:text-primary">
+              شروط الاستخدام
+            </Link>
+            <Link href="/privacy" className="hover:text-primary">
+              سياسة الخصوصية
+            </Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

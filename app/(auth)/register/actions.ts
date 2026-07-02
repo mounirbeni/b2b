@@ -4,6 +4,8 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validations";
 import { generateSlug } from "@/lib/slug";
+import { isRateLimited } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-ip";
 
 export interface RegisterResult {
   success: boolean;
@@ -11,6 +13,10 @@ export interface RegisterResult {
 }
 
 export async function registerAction(formData: FormData): Promise<RegisterResult> {
+  if (isRateLimited(`register:clinic:${getClientIp()}`, 5, 60_000)) {
+    return { success: false, error: "عدد كبير من المحاولات، حاول لاحقاً" };
+  }
+
   const raw = {
     clinicName: String(formData.get("clinicName") ?? ""),
     specialty: String(formData.get("specialty") ?? ""),
