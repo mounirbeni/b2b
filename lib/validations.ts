@@ -1,11 +1,24 @@
 import { z } from "zod";
+import { MOROCCAN_CITIES, SPECIALTIES } from "@/types";
 
 export const registerSchema = z.object({
   clinicName: z.string().min(2, "اسم العيادة مطلوب"),
+  specialty: z.enum(SPECIALTIES, { errorMap: () => ({ message: "التخصص مطلوب" }) }),
+  city: z.enum(MOROCCAN_CITIES, { errorMap: () => ({ message: "المدينة مطلوبة" }) }),
   name: z.string().min(2, "الاسم مطلوب"),
   email: z.string().email("بريد إلكتروني غير صالح"),
   password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
   phone: z.string().optional(),
+});
+
+export const clinicSettingsSchema = z.object({
+  clinicName: z.string().min(2, "اسم العيادة مطلوب"),
+  specialty: z.enum(SPECIALTIES, { errorMap: () => ({ message: "التخصص مطلوب" }) }),
+  city: z.enum(MOROCCAN_CITIES, { errorMap: () => ({ message: "المدينة مطلوبة" }) }),
+  name: z.string().min(2, "الاسم مطلوب"),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+  description: z.string().optional(),
 });
 
 export const loginSchema = z.object({

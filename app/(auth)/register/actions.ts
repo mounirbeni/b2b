@@ -13,6 +13,8 @@ export interface RegisterResult {
 export async function registerAction(formData: FormData): Promise<RegisterResult> {
   const raw = {
     clinicName: String(formData.get("clinicName") ?? ""),
+    specialty: String(formData.get("specialty") ?? ""),
+    city: String(formData.get("city") ?? ""),
     name: String(formData.get("name") ?? ""),
     email: String(formData.get("email") ?? ""),
     password: String(formData.get("password") ?? ""),
@@ -42,6 +44,8 @@ export async function registerAction(formData: FormData): Promise<RegisterResult
       clinic: {
         create: {
           name: parsed.data.clinicName,
+          specialty: parsed.data.specialty,
+          city: parsed.data.city,
           slug: generateSlug(),
         },
       },

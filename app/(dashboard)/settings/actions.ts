@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { clinicSettingsSchema } from "@/lib/validations";
 
 export interface UpdateSettingsResult {
   success: boolean;
@@ -15,22 +16,34 @@ export async function updateSettingsAction(formData: FormData): Promise<UpdateSe
     return { success: false, error: "غير مصرح" };
   }
 
-  const clinicName = String(formData.get("clinicName") ?? "").trim();
-  const name = String(formData.get("name") ?? "").trim();
-  const phone = String(formData.get("phone") ?? "").trim();
-  const address = String(formData.get("address") ?? "").trim();
+  const raw = {
+    clinicName: String(formData.get("clinicName") ?? ""),
+    specialty: String(formData.get("specialty") ?? ""),
+    city: String(formData.get("city") ?? ""),
+    name: String(formData.get("name") ?? ""),
+    phone: String(formData.get("phone") ?? ""),
+    address: String(formData.get("address") ?? ""),
+    description: String(formData.get("description") ?? ""),
+  };
 
-  if (!clinicName || !name) {
-    return { success: false, error: "اسم العيادة والاسم مطلوبان" };
+  const parsed = clinicSettingsSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "بيانات غير صالحة" };
   }
 
   await prisma.user.update({
     where: { id: session.user.id },
     data: {
-      name,
-      phone: phone || null,
+      name: parsed.data.name,
+      phone: parsed.data.phone || null,
       clinic: {
-        update: { name: clinicName, address: address || null },
+        update: {
+          name: parsed.data.clinicName,
+          specialty: parsed.data.specialty,
+          city: parsed.data.city,
+          address: parsed.data.address || null,
+          description: parsed.data.description || null,
+        },
       },
     },
   });
