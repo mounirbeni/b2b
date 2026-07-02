@@ -4,19 +4,30 @@ import { authConfig } from "@/lib/auth.config";
 
 const { auth } = NextAuth(authConfig);
 
-const PUBLIC_PATHS = ["/login", "/register"];
+// Only reachable when signed out; a logged-in clinic owner is bounced to "/".
+const AUTH_ONLY_PATHS = ["/login", "/register"];
+
+// Public marketplace pages, viewable whether logged in or not.
+const OPEN_PATHS = ["/search", "/clinics"];
 
 export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
-  const isPublicPath = PUBLIC_PATHS.some((path) => nextUrl.pathname.startsWith(path));
+  const pathname = nextUrl.pathname;
 
-  if (!isLoggedIn && !isPublicPath) {
+  const isOpenPath = OPEN_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+  if (isOpenPath) {
+    return NextResponse.next();
+  }
+
+  const isAuthOnlyPath = AUTH_ONLY_PATHS.some((path) => pathname.startsWith(path));
+
+  if (!isLoggedIn && !isAuthOnlyPath) {
     const loginUrl = new URL("/login", nextUrl.origin);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isLoggedIn && isPublicPath) {
+  if (isLoggedIn && isAuthOnlyPath) {
     return NextResponse.redirect(new URL("/", nextUrl.origin));
   }
 

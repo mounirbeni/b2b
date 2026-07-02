@@ -22,6 +22,7 @@ export async function updateSettingsAction(formData: FormData): Promise<UpdateSe
     city: String(formData.get("city") ?? ""),
     name: String(formData.get("name") ?? ""),
     phone: String(formData.get("phone") ?? ""),
+    clinicPhone: String(formData.get("clinicPhone") ?? ""),
     address: String(formData.get("address") ?? ""),
     description: String(formData.get("description") ?? ""),
   };
@@ -41,6 +42,7 @@ export async function updateSettingsAction(formData: FormData): Promise<UpdateSe
           name: parsed.data.clinicName,
           specialty: parsed.data.specialty,
           city: parsed.data.city,
+          phone: parsed.data.clinicPhone || null,
           address: parsed.data.address || null,
           description: parsed.data.description || null,
         },

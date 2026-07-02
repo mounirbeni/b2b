@@ -17,6 +17,7 @@ export const clinicSettingsSchema = z.object({
   city: z.enum(MOROCCAN_CITIES, { errorMap: () => ({ message: "المدينة مطلوبة" }) }),
   name: z.string().min(2, "الاسم مطلوب"),
   phone: z.string().optional(),
+  clinicPhone: z.string().optional(),
   address: z.string().optional(),
   description: z.string().optional(),
 });

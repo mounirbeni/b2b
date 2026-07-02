@@ -81,6 +81,12 @@ export default function LoginPage() {
               إنشاء حساب جديد
             </Link>
           </p>
+          <p className="mt-2 text-center text-sm text-muted-foreground">
+            هل أنت مريض؟{" "}
+            <Link href="/search" className="text-primary underline-offset-4 hover:underline">
+              ابحث عن عيادة
+            </Link>
+          </p>
         </CardContent>
       </Card>
     </div>

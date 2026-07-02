@@ -87,14 +87,18 @@ export function SettingsForm({ user, clinic }: { user: User; clinic: Clinic }) {
           <Input id="name" name="name" defaultValue={user.name ?? ""} required />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="phone">الهاتف</Label>
+          <Label htmlFor="phone">هاتفك الشخصي</Label>
           <Input id="phone" name="phone" dir="ltr" defaultValue={user.phone ?? ""} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="email">البريد الإلكتروني</Label>
           <Input id="email" dir="ltr" defaultValue={user.email ?? ""} disabled />
         </div>
-        <div className="space-y-2 sm:col-span-2">
+        <div className="space-y-2">
+          <Label htmlFor="clinicPhone">هاتف العيادة (يظهر للمرضى)</Label>
+          <Input id="clinicPhone" name="clinicPhone" dir="ltr" defaultValue={clinic.phone ?? ""} />
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="address">عنوان العيادة</Label>
           <Input id="address" name="address" defaultValue={clinic.address ?? ""} />
         </div>
