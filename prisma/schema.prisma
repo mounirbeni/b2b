@@ -34,21 +34,38 @@ model Session {
 }
 
 model User {
-  id            String        @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String?       @unique
+  email         String?   @unique
   emailVerified DateTime?
   image         String?
   password      String?
-  clinicName    String?
   phone         String?
-  address       String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   accounts      Account[]
   sessions      Session[]
-  patients      Patient[]
-  appointments  Appointment[]
+  clinic        Clinic?
+}
+
+/// A clinic is the tenant that owns patients/appointments. One owner per clinic for now;
+/// ownerId is kept on Clinic (not User) so multi-staff clinics can be added later without
+/// restructuring this relationship.
+model Clinic {
+  id           String        @id @default(cuid())
+  ownerId      String        @unique
+  owner        User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  slug         String        @unique
+  name         String
+  specialty    String?
+  city         String?
+  address      String?
+  phone        String?
+  description  String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  patients     Patient[]
+  appointments Appointment[]
 }
 
 model Patient {
@@ -62,25 +79,46 @@ model Patient {
   notes        String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-  userId       String
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clinicId     String
+  clinic       Clinic        @relation(fields: [clinicId], references: [id], onDelete: Cascade)
   appointments Appointment[]
+
+  @@index([clinicId])
 }
 
 model Appointment {
+  id               String          @id @default(cuid())
+  dateTime         DateTime
+  duration         Int             @default(30)
+  status           String          @default("SCHEDULED")
+  type             String          @default("CONSULTATION")
+  notes            String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  patientId        String
+  patient          Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  clinicId         String
+  clinic           Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patientAccountId String?
+  patientAccount   PatientAccount? @relation(fields: [patientAccountId], references: [id], onDelete: SetNull)
+  reminders        ReminderLog[]
+
+  @@index([clinicId, dateTime])
+  @@index([patientAccountId])
+}
+
+/// A patient's own login (separate from the per-clinic Patient CRM record), used for
+/// booking across clinics from the public directory and viewing "my bookings".
+model PatientAccount {
   id        String        @id @default(cuid())
-  dateTime  DateTime
-  duration  Int           @default(30)
-  status    String        @default("SCHEDULED")
-  type      String        @default("CONSULTATION")
-  notes     String?
+  name      String
+  phone     String        @unique
+  email     String?       @unique
+  password  String
+  city      String?
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
-  patientId String
-  patient   Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reminders ReminderLog[]
+  bookings  Appointment[]
 }
 
 model ReminderLog {
@@ -88,6 +126,8 @@ model ReminderLog {
   type          String
   status        String
   message       String
+  sid           String?     @unique
+  errorMessage  String?
   sentAt        DateTime    @default(now())
   appointmentId String
   appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)

@@ -73,7 +73,11 @@ export function AppointmentList({ date }: { date: Date }) {
                 </div>
                 <div className="flex items-center gap-1">
                   <StatusBadge status={appt.status} />
-                  <ReminderButton appointmentId={appt.id} />
+                  <ReminderButton
+                    appointmentId={appt.id}
+                    reminders={appt.reminders}
+                    onSent={() => mutate()}
+                  />
                   <Button
                     variant="outline"
                     size="icon"

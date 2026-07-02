@@ -14,7 +14,7 @@ import type { Status } from "@/types";
 export default async function PatientDetailPage({ params }: { params: { id: string } }) {
   const session = await auth();
   const patient = await prisma.patient.findFirst({
-    where: { id: params.id, userId: session!.user.id },
+    where: { id: params.id, clinicId: session!.user.clinicId },
     include: { appointments: { orderBy: { dateTime: "desc" } } },
   });
 

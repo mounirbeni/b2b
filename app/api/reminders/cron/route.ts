@@ -20,9 +20,10 @@ export async function GET(req: NextRequest) {
       status: "SCHEDULED",
       dateTime: { gte: rangeStart, lte: rangeEnd },
     },
-    include: { patient: true, user: true, reminders: true },
+    include: { patient: true, clinic: true, reminders: true },
   });
 
+  const statusCallbackUrl = `${req.nextUrl.origin}/api/whatsapp/status`;
   const results: { appointmentId: string; status: string }[] = [];
 
   for (const appointment of appointments) {
@@ -36,16 +37,18 @@ export async function GET(req: NextRequest) {
       name: appointment.patient.name,
       date: appointment.dateTime,
       time: appointment.dateTime,
-      clinicName: appointment.user.clinicName ?? "العيادة",
+      clinicName: appointment.clinic.name,
     });
 
-    const result = await sendWhatsAppMessage(appointment.patient.phone, message);
+    const result = await sendWhatsAppMessage(appointment.patient.phone, message, statusCallbackUrl);
 
     await prisma.reminderLog.create({
       data: {
         type: "WHATSAPP",
         status: result.success ? "SENT" : "FAILED",
         message,
+        sid: result.sid,
+        errorMessage: result.error,
         appointmentId: appointment.id,
       },
     });

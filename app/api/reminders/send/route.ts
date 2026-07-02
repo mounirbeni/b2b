@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireClinicSession } from "@/lib/auth-guard";
 import { prisma } from "@/lib/prisma";
 import { sendWhatsAppMessage, whatsappTemplates } from "@/lib/whatsapp";
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const session = await requireClinicSession();
+  if (!session) {
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
 
@@ -17,8 +17,8 @@ export async function POST(req: NextRequest) {
   }
 
   const appointment = await prisma.appointment.findFirst({
-    where: { id: appointmentId, userId: session.user.id },
-    include: { patient: true, user: true },
+    where: { id: appointmentId, clinicId: session.user.clinicId },
+    include: { patient: true, clinic: true },
   });
 
   if (!appointment) {
@@ -29,16 +29,19 @@ export async function POST(req: NextRequest) {
     name: appointment.patient.name,
     date: appointment.dateTime,
     time: appointment.dateTime,
-    clinicName: appointment.user.clinicName ?? "العيادة",
+    clinicName: appointment.clinic.name,
   });
 
-  const result = await sendWhatsAppMessage(appointment.patient.phone, message);
+  const statusCallbackUrl = `${req.nextUrl.origin}/api/whatsapp/status`;
+  const result = await sendWhatsAppMessage(appointment.patient.phone, message, statusCallbackUrl);
 
   const log = await prisma.reminderLog.create({
     data: {
       type: "WHATSAPP",
       status: result.success ? "SENT" : "FAILED",
       message,
+      sid: result.sid,
+      errorMessage: result.error,
       appointmentId: appointment.id,
     },
   });

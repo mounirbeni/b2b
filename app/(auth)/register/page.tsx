@@ -10,14 +10,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { MOROCCAN_CITIES, SPECIALTIES, SPECIALTY_LABELS } from "@/types";
 import { registerAction } from "./actions";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [specialty, setSpecialty] = useState("");
+  const [city, setCity] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    if (!specialty || !city) {
+      toast.error("التخصص والمدينة مطلوبان");
+      return;
+    }
+
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
@@ -47,7 +63,7 @@ export default function RegisterPage() {
     }
 
     toast.success("تم إنشاء الحساب بنجاح");
-    router.push("/");
+    router.push("/dashboard");
     router.refresh();
   }
 
@@ -63,6 +79,38 @@ export default function RegisterPage() {
             <div className="space-y-2">
               <Label htmlFor="clinicName">اسم العيادة</Label>
               <Input id="clinicName" name="clinicName" required placeholder="عيادة النور" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="specialty">التخصص</Label>
+              <input type="hidden" name="specialty" value={specialty} />
+              <Select value={specialty} onValueChange={setSpecialty}>
+                <SelectTrigger id="specialty">
+                  <SelectValue placeholder="اختر التخصص" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SPECIALTIES.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {SPECIALTY_LABELS[s]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="city">المدينة</Label>
+              <input type="hidden" name="city" value={city} />
+              <Select value={city} onValueChange={setCity}>
+                <SelectTrigger id="city">
+                  <SelectValue placeholder="اختر المدينة" />
+                </SelectTrigger>
+                <SelectContent>
+                  {MOROCCAN_CITIES.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="name">اسمك الكامل</Label>

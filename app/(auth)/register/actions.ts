@@ -3,6 +3,7 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validations";
+import { generateSlug } from "@/lib/slug";
 
 export interface RegisterResult {
   success: boolean;
@@ -12,6 +13,8 @@ export interface RegisterResult {
 export async function registerAction(formData: FormData): Promise<RegisterResult> {
   const raw = {
     clinicName: String(formData.get("clinicName") ?? ""),
+    specialty: String(formData.get("specialty") ?? ""),
+    city: String(formData.get("city") ?? ""),
     name: String(formData.get("name") ?? ""),
     email: String(formData.get("email") ?? ""),
     password: String(formData.get("password") ?? ""),
@@ -36,9 +39,16 @@ export async function registerAction(formData: FormData): Promise<RegisterResult
     data: {
       email,
       name: parsed.data.name,
-      clinicName: parsed.data.clinicName,
       phone: parsed.data.phone || null,
       password: hashedPassword,
+      clinic: {
+        create: {
+          name: parsed.data.clinicName,
+          specialty: parsed.data.specialty,
+          city: parsed.data.city,
+          slug: generateSlug(),
+        },
+      },
     },
   });
 

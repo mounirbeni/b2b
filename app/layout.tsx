@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Noto_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
@@ -18,6 +18,13 @@ const notoArabic = Noto_Sans_Arabic({
 export const metadata: Metadata = {
   title: "Clinic Manager | إدارة العيادة",
   description: "نظام إدارة المواعيد الطبية للعيادات الصغيرة بالمغرب",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireClinicSession } from "@/lib/auth-guard";
 import { prisma } from "@/lib/prisma";
 import { patientSchema } from "@/lib/validations";
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const session = await requireClinicSession();
+  if (!session) {
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
 
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
   const pageSize = 20;
 
   const where = {
-    userId: session.user.id,
+    clinicId: session.user.clinicId,
     ...(search
       ? {
           OR: [
@@ -64,8 +64,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const session = await requireClinicSession();
+  if (!session) {
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
 
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
         gender: parsed.data.gender || null,
         address: parsed.data.address,
         notes: parsed.data.notes,
-        userId: session.user.id,
+        clinicId: session.user.clinicId,
       },
     });
     return NextResponse.json(patient, { status: 201 });

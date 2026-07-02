@@ -5,9 +5,12 @@ import { SettingsForm } from "./settings-form";
 
 export default async function SettingsPage() {
   const session = await auth();
-  const user = await prisma.user.findUnique({ where: { id: session!.user.id } });
+  const user = await prisma.user.findUnique({
+    where: { id: session!.user.id },
+    include: { clinic: true },
+  });
 
-  if (!user) return null;
+  if (!user || !user.clinic) return null;
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
@@ -17,7 +20,7 @@ export default async function SettingsPage() {
           <CardTitle>معلومات العيادة</CardTitle>
         </CardHeader>
         <CardContent>
-          <SettingsForm user={user} />
+          <SettingsForm user={user} clinic={user.clinic} />
         </CardContent>
       </Card>
     </div>

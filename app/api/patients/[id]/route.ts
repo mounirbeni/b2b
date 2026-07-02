@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireClinicSession } from "@/lib/auth-guard";
 import { prisma } from "@/lib/prisma";
 import { patientSchema } from "@/lib/validations";
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const session = await requireClinicSession();
+  if (!session) {
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
 
   const patient = await prisma.patient.findFirst({
-    where: { id: params.id, userId: session.user.id },
+    where: { id: params.id, clinicId: session.user.clinicId },
     include: {
       appointments: {
         orderBy: { dateTime: "desc" },
@@ -27,8 +27,8 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 }
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const session = await requireClinicSession();
+  if (!session) {
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
 
@@ -38,7 +38,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "بيانات غير صالحة" }, { status: 400 });
   }
 
-  const existing = await prisma.patient.findFirst({ where: { id: params.id, userId: session.user.id } });
+  const existing = await prisma.patient.findFirst({ where: { id: params.id, clinicId: session.user.clinicId } });
   if (!existing) {
     return NextResponse.json({ error: "المريض غير موجود" }, { status: 404 });
   }
@@ -62,12 +62,12 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const session = await requireClinicSession();
+  if (!session) {
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
 
-  const existing = await prisma.patient.findFirst({ where: { id: params.id, userId: session.user.id } });
+  const existing = await prisma.patient.findFirst({ where: { id: params.id, clinicId: session.user.clinicId } });
   if (!existing) {
     return NextResponse.json({ error: "المريض غير موجود" }, { status: 404 });
   }

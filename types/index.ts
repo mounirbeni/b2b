@@ -1,6 +1,6 @@
-import type { Appointment, Patient, ReminderLog, User } from "@prisma/client";
+import type { Appointment, Clinic, Patient, ReminderLog, User } from "@prisma/client";
 
-export type { Appointment, Patient, ReminderLog, User };
+export type { Appointment, Clinic, Patient, ReminderLog, User };
 
 export type Status =
   | "SCHEDULED"
@@ -56,3 +56,69 @@ export const APPOINTMENT_TYPE_LABELS: Record<AppointmentType, string> = {
 export interface ApiError {
   error: string;
 }
+
+export const SPECIALTIES = [
+  "GENERAL",
+  "DENTIST",
+  "DERMATOLOGY",
+  "PEDIATRICS",
+  "CARDIOLOGY",
+  "GYNECOLOGY",
+  "OPHTHALMOLOGY",
+  "ENT",
+  "ORTHOPEDICS",
+  "PSYCHIATRY",
+  "NEUROLOGY",
+  "UROLOGY",
+  "ENDOCRINOLOGY",
+  "GENERAL_SURGERY",
+  "PHYSIOTHERAPY",
+] as const;
+export type Specialty = (typeof SPECIALTIES)[number];
+
+export const SPECIALTY_LABELS: Record<Specialty, string> = {
+  GENERAL: "طب عام",
+  DENTIST: "طب الأسنان",
+  DERMATOLOGY: "الأمراض الجلدية",
+  PEDIATRICS: "طب الأطفال",
+  CARDIOLOGY: "أمراض القلب",
+  GYNECOLOGY: "أمراض النساء والتوليد",
+  OPHTHALMOLOGY: "طب العيون",
+  ENT: "أنف وأذن وحنجرة",
+  ORTHOPEDICS: "جراحة العظام",
+  PSYCHIATRY: "الطب النفسي",
+  NEUROLOGY: "طب الأعصاب",
+  UROLOGY: "المسالك البولية",
+  ENDOCRINOLOGY: "الغدد الصماء والسكري",
+  GENERAL_SURGERY: "الجراحة العامة",
+  PHYSIOTHERAPY: "العلاج الطبيعي",
+};
+
+export const MOROCCAN_CITIES = [
+  "الدار البيضاء",
+  "الرباط",
+  "فاس",
+  "مراكش",
+  "طنجة",
+  "أكادير",
+  "مكناس",
+  "وجدة",
+  "القنيطرة",
+  "تطوان",
+  "آسفي",
+  "الجديدة",
+  "بني ملال",
+  "خريبكة",
+  "سطات",
+  "الناظور",
+  "برشيد",
+  "سلا",
+  "خميسات",
+  "العيون",
+  "الصويرة",
+  "شفشاون",
+  "تازة",
+  "تارودانت",
+  "ورزازات",
+] as const;
+export type MoroccanCity = (typeof MOROCCAN_CITIES)[number];
