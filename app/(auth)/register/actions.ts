@@ -13,7 +13,10 @@ export interface RegisterResult {
 }
 
 export async function registerAction(formData: FormData): Promise<RegisterResult> {
-  if (isRateLimited(`register:clinic:${getClientIp()}`, 5, 60_000)) {
+  // Registration is a rare, high-friction action compared to login (the real brute-force
+  // target), so this is generous enough for e.g. an agency onboarding several clinics in
+  // one sitting while still meaningfully throttling bulk fake-account creation.
+  if (isRateLimited(`register:clinic:${getClientIp()}`, 20, 300_000)) {
     return { success: false, error: "عدد كبير من المحاولات، حاول لاحقاً" };
   }
 

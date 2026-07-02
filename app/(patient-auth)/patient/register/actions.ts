@@ -13,7 +13,7 @@ export interface PatientRegisterResult {
 }
 
 export async function patientRegisterAction(formData: FormData): Promise<PatientRegisterResult> {
-  if (isRateLimited(`register:patient:${getClientIp()}`, 5, 60_000)) {
+  if (isRateLimited(`register:patient:${getClientIp()}`, 20, 300_000)) {
     return { success: false, error: "عدد كبير من المحاولات، حاول لاحقاً" };
   }
 
