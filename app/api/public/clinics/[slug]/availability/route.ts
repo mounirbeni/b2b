@@ -11,7 +11,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
   }
 
   const clinic = await prisma.clinic.findUnique({ where: { slug: params.slug } });
-  if (!clinic || !clinic.specialty || !clinic.city) {
+  if (!clinic || !clinic.specialty || !clinic.city || clinic.status !== "APPROVED") {
     return NextResponse.json({ error: "العيادة غير موجودة" }, { status: 404 });
   }
 

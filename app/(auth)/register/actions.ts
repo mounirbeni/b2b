@@ -34,6 +34,8 @@ export async function registerAction(formData: FormData): Promise<RegisterResult
   }
 
   const hashedPassword = await bcrypt.hash(parsed.data.password, 12);
+  const trialEndsAt = new Date();
+  trialEndsAt.setDate(trialEndsAt.getDate() + 14);
 
   await prisma.user.create({
     data: {
@@ -47,6 +49,9 @@ export async function registerAction(formData: FormData): Promise<RegisterResult
           specialty: parsed.data.specialty,
           city: parsed.data.city,
           slug: generateSlug(),
+          subscription: {
+            create: { plan: "TRIAL", status: "TRIALING", trialEndsAt },
+          },
         },
       },
     },

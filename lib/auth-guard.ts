@@ -13,3 +13,12 @@ export async function requireClinicSession(): Promise<ClinicSession | null> {
   }
   return session as ClinicSession;
 }
+
+/** Resolves the session only if it belongs to a platform admin (email in ADMIN_EMAILS). */
+export async function requireAdminSession(): Promise<Session | null> {
+  const session = await auth();
+  if (!session?.user?.id || session.user.role !== "admin") {
+    return null;
+  }
+  return session;
+}

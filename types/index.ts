@@ -1,6 +1,6 @@
-import type { Appointment, Clinic, Patient, ReminderLog, User } from "@prisma/client";
+import type { Appointment, Clinic, Patient, ReminderLog, Subscription, User } from "@prisma/client";
 
-export type { Appointment, Clinic, Patient, ReminderLog, User };
+export type { Appointment, Clinic, Patient, ReminderLog, Subscription, User };
 
 export type Status =
   | "SCHEDULED"
@@ -122,3 +122,40 @@ export const MOROCCAN_CITIES = [
   "ورزازات",
 ] as const;
 export type MoroccanCity = (typeof MOROCCAN_CITIES)[number];
+
+export const CLINIC_STATUSES = ["PENDING", "APPROVED", "REJECTED", "SUSPENDED"] as const;
+export type ClinicStatus = (typeof CLINIC_STATUSES)[number];
+
+export const CLINIC_STATUS_LABELS: Record<ClinicStatus, string> = {
+  PENDING: "قيد المراجعة",
+  APPROVED: "موافَق عليها",
+  REJECTED: "مرفوضة",
+  SUSPENDED: "معلّقة",
+};
+
+export const CLINIC_STATUS_COLORS: Record<ClinicStatus, string> = {
+  PENDING: "bg-yellow-100 text-yellow-800 border-yellow-300",
+  APPROVED: "bg-green-100 text-green-700 border-green-300",
+  REJECTED: "bg-red-100 text-red-700 border-red-300",
+  SUSPENDED: "bg-gray-100 text-gray-500 border-gray-300",
+};
+
+export const SUBSCRIPTION_PLANS = ["TRIAL", "FREE", "BASIC", "PRO"] as const;
+export type SubscriptionPlan = (typeof SUBSCRIPTION_PLANS)[number];
+
+export const SUBSCRIPTION_PLAN_LABELS: Record<SubscriptionPlan, string> = {
+  TRIAL: "تجريبي",
+  FREE: "مجاني",
+  BASIC: "أساسي",
+  PRO: "مميز",
+};
+
+export const SUBSCRIPTION_STATUSES = ["TRIALING", "ACTIVE", "PAST_DUE", "CANCELED"] as const;
+export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUSES)[number];
+
+export const SUBSCRIPTION_STATUS_LABELS: Record<SubscriptionStatus, string> = {
+  TRIALING: "تجربة مجانية",
+  ACTIVE: "نشط",
+  PAST_DUE: "متأخر الدفع",
+  CANCELED: "ملغى",
+};

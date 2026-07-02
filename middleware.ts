@@ -5,13 +5,14 @@ import { authConfig } from "@/lib/auth.config";
 const { auth } = NextAuth(authConfig);
 
 // Public marketplace pages, viewable whether logged in or not.
-const OPEN_PATHS = ["/", "/search", "/clinics"];
+const OPEN_PATHS = ["/", "/search", "/clinics", "/terms", "/privacy"];
 
 // Only reachable when signed out of the matching realm.
 const CLINIC_AUTH_ONLY_PATHS = ["/login", "/register"];
 const PATIENT_AUTH_ONLY_PATHS = ["/patient/login", "/patient/register"];
 
 const PATIENT_PREFIX = "/patient";
+const ADMIN_PREFIX = "/admin";
 
 /** Path-segment-aware prefix match: "/patients" must not match the "/patient" prefix. */
 function matchesPath(pathname: string, prefix: string) {
@@ -44,10 +45,21 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
+  const isAdminArea = matchesPath(pathname, ADMIN_PREFIX);
+  if (isAdminArea) {
+    if (role !== "admin") {
+      return NextResponse.redirect(new URL("/login", nextUrl.origin));
+    }
+    return NextResponse.next();
+  }
+
   const isClinicAuthOnly = CLINIC_AUTH_ONLY_PATHS.some((path) => matchesPath(pathname, path));
   if (isClinicAuthOnly) {
     if (role === "clinic") {
       return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
+    }
+    if (role === "admin") {
+      return NextResponse.redirect(new URL("/admin", nextUrl.origin));
     }
     return NextResponse.next();
   }

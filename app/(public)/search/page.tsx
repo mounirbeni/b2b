@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MapPin, Search as SearchIcon } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
+import { PUBLISHED_CLINIC_WHERE } from "@/lib/clinic";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MOROCCAN_CITIES, SPECIALTIES, SPECIALTY_LABELS, type Specialty } from "@/types";
@@ -20,8 +21,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   const clinics = await prisma.clinic.findMany({
     where: {
-      specialty: { not: null },
-      city: { not: null },
+      ...PUBLISHED_CLINIC_WHERE,
       ...(city && { city }),
       ...(specialty && { specialty }),
       ...(q && { name: { contains: q } }),

@@ -24,10 +24,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           include: { clinic: true },
         });
 
-        if (!user || !user.password || !user.clinic) return null;
+        if (!user || !user.password) return null;
 
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) return null;
+
+        const adminEmails = (process.env.ADMIN_EMAILS ?? "")
+          .split(",")
+          .map((e) => e.trim().toLowerCase())
+          .filter(Boolean);
+        if (user.email && adminEmails.includes(user.email.toLowerCase())) {
+          return { id: user.id, name: user.name, email: user.email, role: "admin" };
+        }
+
+        if (!user.clinic) return null;
 
         return {
           id: user.id,
