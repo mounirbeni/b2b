@@ -4,6 +4,8 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { patientAccountRegisterSchema } from "@/lib/validations";
 import { normalizeMoroccanPhone } from "@/lib/phone";
+import { isRateLimited } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-ip";
 
 export interface PatientRegisterResult {
   success: boolean;
@@ -11,6 +13,10 @@ export interface PatientRegisterResult {
 }
 
 export async function patientRegisterAction(formData: FormData): Promise<PatientRegisterResult> {
+  if (isRateLimited(`register:patient:${getClientIp()}`, 20, 300_000)) {
+    return { success: false, error: "عدد كبير من المحاولات، حاول لاحقاً" };
+  }
+
   const raw = {
     name: String(formData.get("name") ?? ""),
     phone: String(formData.get("phone") ?? ""),

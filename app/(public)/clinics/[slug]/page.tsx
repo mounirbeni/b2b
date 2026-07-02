@@ -15,7 +15,7 @@ export default async function ClinicProfilePage({ params }: { params: { slug: st
     auth(),
   ]);
 
-  if (!clinic || !clinic.specialty || !clinic.city) notFound();
+  if (!clinic || !clinic.specialty || !clinic.city || clinic.status !== "APPROVED") notFound();
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">

@@ -35,7 +35,9 @@ export default function LoginPage() {
     }
 
     toast.success("تم تسجيل الدخول بنجاح");
-    router.push("/dashboard");
+    const sessionRes = await fetch("/api/auth/session");
+    const session = await sessionRes.json();
+    router.push(session?.user?.role === "admin" ? "/admin" : "/dashboard");
     router.refresh();
   }
 

@@ -132,6 +132,16 @@ export default function RegisterPage() {
               {loading ? "جاري الإنشاء..." : "إنشاء الحساب"}
             </Button>
           </form>
+          <p className="mt-4 text-center text-xs text-muted-foreground">
+            بإنشاء الحساب أنت توافق على{" "}
+            <Link href="/terms" className="underline-offset-4 hover:underline">
+              شروط الاستخدام
+            </Link>{" "}
+            و{" "}
+            <Link href="/privacy" className="underline-offset-4 hover:underline">
+              سياسة الخصوصية
+            </Link>
+          </p>
           <p className="mt-4 text-center text-sm text-muted-foreground">
             لديك حساب؟{" "}
             <Link href="/login" className="text-primary underline-offset-4 hover:underline">

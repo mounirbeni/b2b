@@ -4,6 +4,8 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validations";
 import { generateSlug } from "@/lib/slug";
+import { isRateLimited } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-ip";
 
 export interface RegisterResult {
   success: boolean;
@@ -11,6 +13,13 @@ export interface RegisterResult {
 }
 
 export async function registerAction(formData: FormData): Promise<RegisterResult> {
+  // Registration is a rare, high-friction action compared to login (the real brute-force
+  // target), so this is generous enough for e.g. an agency onboarding several clinics in
+  // one sitting while still meaningfully throttling bulk fake-account creation.
+  if (isRateLimited(`register:clinic:${getClientIp()}`, 20, 300_000)) {
+    return { success: false, error: "عدد كبير من المحاولات، حاول لاحقاً" };
+  }
+
   const raw = {
     clinicName: String(formData.get("clinicName") ?? ""),
     specialty: String(formData.get("specialty") ?? ""),
@@ -34,6 +43,8 @@ export async function registerAction(formData: FormData): Promise<RegisterResult
   }
 
   const hashedPassword = await bcrypt.hash(parsed.data.password, 12);
+  const trialEndsAt = new Date();
+  trialEndsAt.setDate(trialEndsAt.getDate() + 14);
 
   await prisma.user.create({
     data: {
@@ -47,6 +58,9 @@ export async function registerAction(formData: FormData): Promise<RegisterResult
           specialty: parsed.data.specialty,
           city: parsed.data.city,
           slug: generateSlug(),
+          subscription: {
+            create: { plan: "TRIAL", status: "TRIALING", trialEndsAt },
+          },
         },
       },
     },

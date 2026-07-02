@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   }
 
   const clinic = await prisma.clinic.findUnique({ where: { slug: parsed.data.clinicSlug } });
-  if (!clinic || !clinic.specialty || !clinic.city) {
+  if (!clinic || !clinic.specialty || !clinic.city || clinic.status !== "APPROVED") {
     return NextResponse.json({ error: "العيادة غير موجودة" }, { status: 404 });
   }
 

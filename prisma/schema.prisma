@@ -62,10 +62,27 @@ model Clinic {
   address      String?
   phone        String?
   description  String?
+  /// PENDING | APPROVED | REJECTED | SUSPENDED — only APPROVED clinics are publicly listed/bookable.
+  status       String        @default("PENDING")
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   patients     Patient[]
   appointments Appointment[]
+  subscription Subscription?
+}
+
+/// Manually managed for now (no payment gateway integration yet) — an admin activates/suspends
+/// this from /admin after receiving payment out-of-band (bank transfer etc).
+model Subscription {
+  id               String    @id @default(cuid())
+  clinicId         String    @unique
+  clinic           Clinic    @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  plan             String    @default("TRIAL") // TRIAL | FREE | BASIC | PRO
+  status           String    @default("TRIALING") // TRIALING | ACTIVE | PAST_DUE | CANCELED
+  trialEndsAt      DateTime?
+  currentPeriodEnd DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 }
 
 model Patient {
