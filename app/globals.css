@@ -39,3 +39,49 @@
 [dir="rtl"] .rtl-flip {
   transform: scaleX(-1);
 }
+
+/* ============================================================================
+   Homepage atmosphere — soft light glow, floating glass panels, gentle motion.
+   Kept local to the marketing homepage; the app dashboards use their own
+   design system (app/(medflow)/medflow.css).
+   ========================================================================== */
+@keyframes hero-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(2%, -3%, 0) scale(1.05); }
+}
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-float {
+  0%, 100% { transform: translateY(0) rotate(var(--tilt, 0deg)); }
+  50% { transform: translateY(-10px) rotate(var(--tilt, 0deg)); }
+}
+.hero-rise {
+  animation: hero-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.hero-glow {
+  animation: hero-drift 14s ease-in-out infinite;
+}
+.hero-float {
+  animation: hero-float 6s ease-in-out infinite;
+}
+.hero-glass {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.hero-panel {
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: 0 24px 60px -16px rgba(2, 8, 23, 0.45), 0 4px 16px -4px rgba(2, 8, 23, 0.2);
+}
+.hero-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 20%, black 40%, transparent 100%);
+}
