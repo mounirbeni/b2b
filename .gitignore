@@ -4,7 +4,5 @@ out
 build
 .env
 .env*.local
-dev.db
-dev.db-journal
 *.log
 .DS_Store
