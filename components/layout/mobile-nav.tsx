@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, LayoutDashboard, Settings, Users } from "lucide-react";
+import { BarChart3, CalendarDays, LayoutDashboard, Settings, Users } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: "/", label: "الرئيسية", icon: LayoutDashboard },
   { href: "/patients", label: "المرضى", icon: Users },
   { href: "/appointments", label: "المواعيد", icon: CalendarDays },
+  { href: "/reports", label: "التقارير", icon: BarChart3 },
   { href: "/settings", label: "الإعدادات", icon: Settings },
 ];
 
