@@ -6,8 +6,8 @@ import { requireClinicSession } from "@/lib/auth-guard";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
-  title: "MedFlow AI — Premium Clinic OS",
-  description: "A world-class, enterprise-grade clinic management platform.",
+  title: "MBN Health — Clinic OS",
+  description: "A premium, enterprise-grade clinic management platform.",
 };
 
 export default async function MedFlowLayout({ children }: { children: React.ReactNode }) {

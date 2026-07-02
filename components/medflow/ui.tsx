@@ -119,17 +119,17 @@ export function PageHeader({
       <div className="flex items-center gap-3.5">
         {icon && (
           <span
-            className="flex h-11 w-11 items-center justify-center rounded-2xl"
-            style={{ background: "var(--mf-primary-soft)", color: "var(--mf-primary)" }}
+            className="flex h-11 w-11 items-center justify-center rounded-[14px]"
+            style={{ background: "var(--mf-primary-soft)", color: "var(--mf-primary)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--mf-primary) 16%, transparent)" }}
           >
             {icon}
           </span>
         )}
         <div>
-          <h1 className="text-[22px] font-bold tracking-tight" style={{ color: "var(--mf-text)" }}>
+          <h1 className="text-[23px] font-bold tracking-[-0.025em]" style={{ color: "var(--mf-text)" }}>
             {title}
           </h1>
-          {subtitle && <p className="text-sm" style={{ color: "var(--mf-text-2)" }}>{subtitle}</p>}
+          {subtitle && <p className="mt-0.5 text-[13.5px]" style={{ color: "var(--mf-text-2)" }}>{subtitle}</p>}
         </div>
       </div>
       {children && <div className="flex items-center gap-2.5">{children}</div>}
@@ -262,23 +262,29 @@ export function StatTile({
   const t = TONES[tone];
   return (
     <div className="mf-card mf-card-hover group relative overflow-hidden p-5">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-[13px] font-medium" style={{ color: "var(--mf-text-2)" }}>{label}</p>
-          <p className="mt-1.5 text-[26px] font-bold leading-none tracking-tight mf-nums" style={{ color: "var(--mf-text)" }}>
-            {value}
-          </p>
-        </div>
+      {/* soft corner glow in the tile's tone */}
+      <div
+        className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
+        style={{ background: t.fg }}
+      />
+      <div className="relative flex items-start justify-between">
         {icon && (
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ color: t.fg, background: t.bg }}>
+          <span
+            className="flex h-11 w-11 items-center justify-center rounded-[14px]"
+            style={{ color: t.fg, background: t.bg, boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${t.fg} 16%, transparent)` }}
+          >
             {icon}
           </span>
         )}
+        {delta !== undefined && <Delta value={delta} invert={invertDelta} />}
       </div>
-      <div className="mt-3 flex items-end justify-between gap-2">
-        {delta !== undefined ? <Delta value={delta} invert={invertDelta} /> : <span />}
-        {spark && <div className="opacity-90">{spark}</div>}
+      <div className="relative mt-4">
+        <p className="text-[28px] font-bold leading-none tracking-[-0.02em] mf-nums" style={{ color: "var(--mf-text)" }}>
+          {value}
+        </p>
+        <p className="mt-1.5 text-[13px] font-medium" style={{ color: "var(--mf-text-2)" }}>{label}</p>
       </div>
+      {spark && <div className="relative mt-3 opacity-90">{spark}</div>}
       {children}
     </div>
   );

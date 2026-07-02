@@ -234,7 +234,12 @@ export function DonutChart({
           <div key={d.label} className="flex items-center gap-2.5 text-sm" onMouseEnter={() => setActive(i)} onMouseLeave={() => setActive(null)} style={{ cursor: "pointer" }}>
             <span className="h-2.5 w-2.5 rounded-full" style={{ background: d.color }} />
             <span style={{ color: "var(--mf-text-2)" }}>{d.label}</span>
-            <span className="ml-auto font-semibold mf-nums" style={{ color: "var(--mf-text)" }}>{d.v}%</span>
+            <span className="ml-auto flex items-center gap-1.5">
+              <span className="text-[12px] mf-nums" style={{ color: "var(--mf-text-3)" }}>{d.v}</span>
+              <span className="font-semibold mf-nums" style={{ color: "var(--mf-text)", minWidth: 34, textAlign: "right", display: "inline-block" }}>
+                {total > 0 ? Math.round((d.v / total) * 100) : 0}%
+              </span>
+            </span>
           </div>
         ))}
       </div>

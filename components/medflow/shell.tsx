@@ -13,7 +13,7 @@ import {
 import { notifications as notifData } from "@/lib/medflow/data";
 import { Avatar, cx } from "@/components/medflow/ui";
 
-type NavItem = { href: string; label: string; icon: React.ComponentType<{ size?: number | string; strokeWidth?: number | string }>; badgeKey?: "today" | "waiting"; live?: boolean };
+type NavItem = { href: string; label: string; icon: React.ComponentType<{ size?: number | string; strokeWidth?: number | string; style?: React.CSSProperties }>; badgeKey?: "today" | "waiting"; live?: boolean };
 type NavGroup = { label: string; items: NavItem[] };
 
 const NAV: NavGroup[] = [
@@ -284,6 +284,28 @@ function UserMenu({ userName, clinicName }: { userName: string; clinicName: stri
   );
 }
 
+/* ---------------- Brand mark ---------------- */
+function BrandMark({ size = 36 }: { size?: number }) {
+  const id = React.useId();
+  return (
+    <span
+      className="relative flex shrink-0 items-center justify-center rounded-[12px]"
+      style={{ width: size, height: size, boxShadow: "0 6px 16px -6px rgba(37,99,235,0.55), inset 0 1px 0 rgba(255,255,255,0.25)" }}
+    >
+      <svg width={size} height={size} viewBox="0 0 36 36" fill="none" aria-hidden>
+        <defs>
+          <linearGradient id={`bm-${id}`} x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#3b82f6" />
+            <stop offset="1" stopColor="#1d4ed8" />
+          </linearGradient>
+        </defs>
+        <rect width="36" height="36" rx="11" fill={`url(#bm-${id})`} />
+        <path d="M18 9.5c-.7 0-1.3.5-1.4 1.2l-.7 4.2-4.2.7c-.8.1-1.3.8-1.2 1.6.1.6.6 1.1 1.2 1.2l4.2.7.7 4.2c.1.8.9 1.3 1.6 1.2.6-.1 1.1-.6 1.2-1.2l.7-4.2 4.2-.7c.8-.1 1.3-.9 1.2-1.6-.1-.6-.6-1.1-1.2-1.2l-4.2-.7-.7-4.2c-.1-.7-.7-1.2-1.4-1.2Z" fill="#fff" fillOpacity="0.95" />
+      </svg>
+    </span>
+  );
+}
+
 /* ---------------- Sidebar ---------------- */
 function SidebarContent({
   collapsed,
@@ -297,14 +319,12 @@ function SidebarContent({
   const pathname = usePathname();
   return (
     <>
-      <div className={cx("flex h-16 items-center gap-2.5 px-4", collapsed && "justify-center px-0")}>
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl mf-brand-gradient text-white shadow-lg" style={{ boxShadow: "0 8px 20px -6px rgba(37,99,235,0.6)" }}>
-          <Sparkles size={18} />
-        </span>
+      <div className={cx("flex h-[68px] items-center gap-2.5 px-5", collapsed && "justify-center px-0")}>
+        <BrandMark />
         {!collapsed && (
           <div className="leading-none">
-            <p className="text-[15px] font-bold tracking-tight" style={{ color: "var(--mf-text)" }}>MedFlow<span style={{ color: "var(--mf-primary)" }}> AI</span></p>
-            <p className="mt-1 text-[10px] font-medium uppercase tracking-wider" style={{ color: "var(--mf-text-3)" }}>Clinic OS</p>
+            <p className="text-[16px] font-bold tracking-[-0.02em]" style={{ color: "var(--mf-text)" }}>MBN<span style={{ color: "var(--mf-primary)" }}> Health</span></p>
+            <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--mf-text-3)" }}>Clinic OS</p>
           </div>
         )}
       </div>
@@ -326,17 +346,23 @@ function SidebarContent({
                     href={item.href}
                     onClick={onNavigate}
                     title={collapsed ? item.label : undefined}
-                    className={cx("group relative flex items-center gap-3 rounded-xl px-3 py-2 text-[13.5px] font-medium transition-all", collapsed && "justify-center px-0")}
+                    className={cx(
+                      "mf-nav-item group relative flex items-center gap-3 rounded-[12px] px-3 py-[9px] text-[13.5px] font-medium transition-all duration-200",
+                      collapsed && "justify-center px-0",
+                      active && "mf-nav-active"
+                    )}
                     style={{
-                      color: active ? "var(--mf-primary)" : "var(--mf-text-2)",
-                      background: active ? "var(--mf-primary-soft)" : "transparent",
+                      color: active ? "var(--mf-text)" : "var(--mf-text-2)",
+                      background: active ? "var(--mf-surface)" : "transparent",
+                      boxShadow: active ? "var(--mf-shadow-sm)" : "none",
+                      border: active ? "1px solid var(--mf-hairline)" : "1px solid transparent",
                     }}
                   >
-                    {active && !collapsed && <span className="absolute left-0 top-1/2 h-5 -translate-y-1/2 rounded-r-full" style={{ width: 3, background: "var(--mf-primary)" }} />}
-                    <Icon size={18} strokeWidth={active ? 2.3 : 2} />
+                    {active && !collapsed && <span className="absolute left-0 top-1/2 h-4 -translate-y-1/2 rounded-r-full" style={{ width: 3, background: "var(--mf-primary)" }} />}
+                    <Icon size={18} strokeWidth={active ? 2.4 : 2} style={{ color: active ? "var(--mf-primary)" : "inherit" }} />
                     {!collapsed && <span className="flex-1">{item.label}</span>}
-                    {!collapsed && badgeValue !== undefined && (
-                      <span className="rounded-md px-1.5 py-0.5 text-[10px] font-semibold mf-nums" style={{ background: active ? "var(--mf-primary)" : "var(--mf-surface-hover)", color: active ? "#fff" : "var(--mf-text-2)" }}>
+                    {!collapsed && badgeValue !== undefined && badgeValue > 0 && (
+                      <span className="rounded-md px-1.5 py-0.5 text-[10px] font-bold mf-nums" style={{ background: active ? "var(--mf-primary)" : "var(--mf-surface-hover)", color: active ? "#fff" : "var(--mf-text-2)" }}>
                         {badgeValue}
                       </span>
                     )}
@@ -354,9 +380,9 @@ function SidebarContent({
             <div className="absolute inset-0 mf-mesh opacity-80" />
             <div className="relative">
               <div className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold" style={{ color: "var(--mf-primary)" }}>
-                <Sparkles size={15} /> MedFlow AI
+                <Sparkles size={15} /> MBN Assistant
               </div>
-              <p className="text-[12px] leading-relaxed" style={{ color: "var(--mf-text-2)" }}>AI note-drafting and schedule optimization are coming soon — this preview shows where they'll live.</p>
+              <p className="text-[12px] leading-relaxed" style={{ color: "var(--mf-text-2)" }}>AI note-drafting and schedule optimization are on the way — this is where they'll live.</p>
               <button disabled className="mf-btn mf-btn-outline mf-btn-sm mt-3 w-full opacity-70">Coming soon</button>
             </div>
           </div>
@@ -408,7 +434,7 @@ export function Shell({
         {/* Desktop sidebar */}
         <aside
           className="sticky top-0 hidden h-screen shrink-0 flex-col border-r transition-[width] duration-300 lg:flex"
-          style={{ width: collapsed ? 76 : 264, background: "var(--mf-surface)", borderColor: "var(--mf-border)" }}
+          style={{ width: collapsed ? 78 : 268, background: "var(--mf-surface-2)", borderColor: "var(--mf-hairline)" }}
         >
           <SidebarContent collapsed={collapsed} badges={badges} />
         </aside>
@@ -417,7 +443,7 @@ export function Shell({
         {mobileOpen && (
           <div className="fixed inset-0 z-[60] lg:hidden">
             <div className="mf-animate-fade absolute inset-0" style={{ background: "rgba(2,6,23,0.5)" }} onClick={() => setMobileOpen(false)} />
-            <aside className="absolute left-0 top-0 flex h-full w-[280px] flex-col border-r" style={{ background: "var(--mf-surface)", borderColor: "var(--mf-border)", animation: "mf-fade 0.2s ease" }}>
+            <aside className="absolute left-0 top-0 flex h-full w-[280px] flex-col border-r" style={{ background: "var(--mf-surface-2)", borderColor: "var(--mf-hairline)", animation: "mf-fade 0.2s ease" }}>
               <button className="mf-btn mf-btn-ghost mf-btn-icon absolute right-2 top-3" onClick={() => setMobileOpen(false)}><X size={18} /></button>
               <SidebarContent collapsed={false} onNavigate={() => setMobileOpen(false)} badges={badges} />
             </aside>
@@ -427,26 +453,26 @@ export function Shell({
         {/* Main column */}
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Topbar */}
-          <header className="mf-glass sticky top-0 z-40 flex h-16 items-center gap-3 border-b px-4 md:px-6" style={{ borderColor: "var(--mf-border)" }}>
+          <header className="mf-glass sticky top-0 z-40 flex h-16 items-center gap-3 px-4 md:px-6" style={{ borderBottom: "1px solid var(--mf-hairline)" }}>
             <button className="mf-btn mf-btn-ghost mf-btn-icon lg:hidden" onClick={() => setMobileOpen(true)}><Menu size={18} /></button>
             <button className="mf-btn mf-btn-ghost mf-btn-icon hidden lg:flex" onClick={() => setCollapsed((c) => !c)} title="Collapse sidebar">
               <ChevronsLeft size={18} style={{ transform: collapsed ? "rotate(180deg)" : "none", transition: "transform 0.3s" }} />
             </button>
 
             <div className="hidden items-center gap-1.5 md:flex">
-              <span className="text-[13px]" style={{ color: "var(--mf-text-3)" }}>MedFlow</span>
+              <span className="text-[13px] font-medium" style={{ color: "var(--mf-text-3)" }}>MBN Health</span>
               <span style={{ color: "var(--mf-text-3)" }}>/</span>
               <span className="text-[13px] font-semibold" style={{ color: "var(--mf-text)" }}>{current?.label ?? "Dashboard"}</span>
             </div>
 
             <button
               onClick={() => setPaletteOpen(true)}
-              className="group ml-auto flex h-9 w-9 items-center justify-center rounded-xl border transition-colors hover:bg-[var(--mf-surface-hover)] md:ml-6 md:h-10 md:w-72 md:justify-start md:gap-2.5 md:px-3"
-              style={{ borderColor: "var(--mf-border)", background: "var(--mf-surface)", color: "var(--mf-text-3)" }}
+              className="group ml-auto flex h-10 w-10 items-center justify-center rounded-[13px] border transition-colors hover:bg-[var(--mf-surface-hover)] md:ml-6 md:w-80 md:justify-start md:gap-2.5 md:px-3.5"
+              style={{ borderColor: "var(--mf-border)", background: "var(--mf-surface)", color: "var(--mf-text-3)", boxShadow: "var(--mf-shadow-xs)" }}
             >
               <Search size={17} />
-              <span className="hidden text-[13px] md:inline">Search everything…</span>
-              <span className="ml-auto hidden items-center gap-0.5 rounded-md border px-1.5 py-0.5 text-[11px] font-medium md:flex" style={{ borderColor: "var(--mf-border)" }}>
+              <span className="hidden text-[13px] md:inline">Search patients, pages…</span>
+              <span className="ml-auto hidden items-center gap-0.5 rounded-md border px-1.5 py-0.5 text-[11px] font-semibold md:flex" style={{ borderColor: "var(--mf-border)" }}>
                 <Command size={11} /> K
               </span>
             </button>

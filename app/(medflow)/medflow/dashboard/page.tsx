@@ -37,6 +37,9 @@ export default async function DashboardPage() {
 
   const [clinic, data] = await Promise.all([getClinic(clinicId), getDashboardData(clinicId)]);
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
   const donutData = (Object.keys(REAL_STATUS_META) as Status[])
     .map((s) => ({ label: REAL_STATUS_META[s].label, v: data.monthByStatus[s], color: REAL_STATUS_META[s].dot }))
     .filter((d) => d.v > 0);
@@ -80,23 +83,37 @@ export default async function DashboardPage() {
       )}
 
       {/* Hero */}
-      <div className="mf-animate-in relative overflow-hidden rounded-3xl border p-6 md:p-7" style={{ borderColor: "var(--mf-border)", background: "var(--mf-surface)" }}>
-        <div className="absolute inset-0 mf-mesh" />
-        <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+      <div className="mf-animate-in relative overflow-hidden rounded-[24px] p-6 md:p-8" style={{ background: "var(--mf-surface)", border: "1px solid var(--mf-hairline)", boxShadow: "var(--mf-shadow-sm)" }}>
+        <div className="pointer-events-none absolute inset-0 mf-mesh opacity-70" />
+        <div className="pointer-events-none absolute inset-0 mf-fieldgrid opacity-[0.5]" />
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-medium" style={{ background: "var(--mf-surface-2)", color: "var(--mf-text-2)" }}>
-              <span className="mf-dot" style={{ background: "var(--mf-success)" }} /> {formatDateArabic(new Date())}
+            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-medium" style={{ background: "var(--mf-surface)", border: "1px solid var(--mf-hairline)", color: "var(--mf-text-2)", boxShadow: "var(--mf-shadow-xs)" }}>
+              <span className="mf-dot mf-live" style={{ background: "var(--mf-success)", color: "var(--mf-success)" }} /> {formatDateArabic(new Date())}
             </div>
-            <h1 className="text-[26px] font-bold tracking-tight md:text-[30px]" style={{ color: "var(--mf-text)" }}>
-              {clinic?.name ?? "Your Clinic"}
+            <h1 className="text-[28px] font-bold leading-tight tracking-[-0.025em] md:text-[34px]" style={{ color: "var(--mf-text)" }}>
+              {greeting}, <span className="mf-text-gradient">{(clinic?.name ?? "Clinic").split(" ")[0]}</span>
             </h1>
-            <p className="mt-1 text-[15px]" style={{ color: "var(--mf-text-2)" }}>
-              You have <b style={{ color: "var(--mf-text)" }}>{data.counts.todayTotal} appointments</b> today ·{" "}
-              {data.counts.waiting} waiting · {data.counts.inConsultation} in consultation.
+            <p className="mt-1.5 text-[15px]" style={{ color: "var(--mf-text-2)" }}>
+              Here's what's happening across your clinic today.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2.5">
-            <a href="/medflow/appointments" className="mf-btn mf-btn-primary"><Plus size={16} /> New Appointment</a>
+
+          <div className="flex flex-col gap-3.5 sm:flex-row sm:items-center">
+            {/* live micro-metrics */}
+            <div className="flex items-center gap-2.5">
+              {[
+                { n: data.counts.waiting, l: "Waiting", c: "var(--mf-warning)" },
+                { n: data.counts.inConsultation, l: "In room", c: "var(--mf-primary)" },
+                { n: data.counts.completed, l: "Done", c: "var(--mf-success)" },
+              ].map((m) => (
+                <div key={m.l} className="rounded-2xl px-3.5 py-2.5 text-center" style={{ background: "var(--mf-surface)", border: "1px solid var(--mf-hairline)", boxShadow: "var(--mf-shadow-xs)", minWidth: 72 }}>
+                  <p className="text-[20px] font-bold leading-none mf-nums" style={{ color: m.c }}>{m.n}</p>
+                  <p className="mt-1 text-[11px] font-medium" style={{ color: "var(--mf-text-3)" }}>{m.l}</p>
+                </div>
+              ))}
+            </div>
+            <a href="/medflow/appointments" className="mf-btn mf-btn-primary shrink-0"><Plus size={16} /> New Appointment</a>
           </div>
         </div>
       </div>
