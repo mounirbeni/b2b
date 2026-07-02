@@ -187,7 +187,11 @@ export function DailySchedule({
                             ))}
                           </SelectContent>
                         </Select>
-                        <ReminderButton appointmentId={appt.id} />
+                        <ReminderButton
+                          appointmentId={appt.id}
+                          reminders={appt.reminders}
+                          onSent={() => mutate()}
+                        />
                         <Button
                           variant="outline"
                           size="icon"

@@ -88,6 +88,8 @@ model ReminderLog {
   type          String
   status        String
   message       String
+  sid           String?     @unique
+  errorMessage  String?
   sentAt        DateTime    @default(now())
   appointmentId String
   appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)

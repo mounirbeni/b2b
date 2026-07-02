@@ -1,5 +1,6 @@
 import twilio from "twilio";
 import { formatDateDisplay, formatTimeDisplay } from "@/lib/date-utils";
+import { normalizeMoroccanPhone } from "@/lib/phone";
 
 interface SendResult {
   success: boolean;
@@ -14,8 +15,18 @@ function getClient() {
   return twilio(accountSid, authToken);
 }
 
-/** Sends a WhatsApp message via Twilio. `to` should be a raw phone number (e.g. +2126...). */
-export async function sendWhatsAppMessage(to: string, body: string): Promise<SendResult> {
+/**
+ * Sends a WhatsApp message via Twilio. `to` should be a raw phone number (e.g. +2126... or 06...).
+ * A successful result only means Twilio *queued* the message — actual delivery is async and
+ * only observable via the `statusCallbackUrl` webhook (see /api/whatsapp/status), because WhatsApp
+ * can silently reject business-initiated messages (sandbox not joined, no approved template,
+ * outside the 24h session window) after Twilio has already accepted the API call.
+ */
+export async function sendWhatsAppMessage(
+  to: string,
+  body: string,
+  statusCallbackUrl?: string
+): Promise<SendResult> {
   const client = getClient();
   const from = process.env.TWILIO_WHATSAPP_FROM;
 
@@ -23,13 +34,15 @@ export async function sendWhatsAppMessage(to: string, body: string): Promise<Sen
     return { success: false, error: "Twilio credentials are not configured" };
   }
 
-  const normalizedTo = to.startsWith("whatsapp:") ? to : `whatsapp:${to}`;
+  const normalizedFrom = from.startsWith("whatsapp:") ? from : `whatsapp:${from}`;
+  const normalizedTo = `whatsapp:${normalizeMoroccanPhone(to)}`;
 
   try {
     const message = await client.messages.create({
-      from,
+      from: normalizedFrom,
       to: normalizedTo,
       body,
+      ...(statusCallbackUrl ? { statusCallback: statusCallbackUrl } : {}),
     });
     return { success: true, sid: message.sid };
   } catch (err) {

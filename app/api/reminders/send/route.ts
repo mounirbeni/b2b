@@ -32,13 +32,16 @@ export async function POST(req: NextRequest) {
     clinicName: appointment.user.clinicName ?? "العيادة",
   });
 
-  const result = await sendWhatsAppMessage(appointment.patient.phone, message);
+  const statusCallbackUrl = `${req.nextUrl.origin}/api/whatsapp/status`;
+  const result = await sendWhatsAppMessage(appointment.patient.phone, message, statusCallbackUrl);
 
   const log = await prisma.reminderLog.create({
     data: {
       type: "WHATSAPP",
       status: result.success ? "SENT" : "FAILED",
       message,
+      sid: result.sid,
+      errorMessage: result.error,
       appointmentId: appointment.id,
     },
   });
