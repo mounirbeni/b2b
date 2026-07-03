@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BrandLogo } from "@/components/brand-logo";
 import {
   Select,
   SelectContent,
@@ -68,11 +69,12 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">إنشاء حساب جديد</CardTitle>
-          <CardDescription>سجّل عيادتك للبدء في استخدام النظام</CardDescription>
+        <CardHeader className="items-center text-center">
+          <BrandLogo href={null} className="mb-2" />
+          <CardTitle className="text-2xl">سجّل عيادتك</CardTitle>
+          <CardDescription>ابدأ بإدارة عيادتك في دقائق — مجانًا</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

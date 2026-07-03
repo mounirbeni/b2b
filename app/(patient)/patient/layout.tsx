@@ -9,7 +9,7 @@ export default async function PatientAreaLayout({ children }: { children: React.
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       <PatientHeader userName={session.user.name ?? "حسابي"} />
       <main className="mx-auto max-w-3xl p-4 md:p-6">{children}</main>
     </div>

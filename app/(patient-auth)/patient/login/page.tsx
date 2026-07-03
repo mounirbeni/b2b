@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BrandLogo } from "@/components/brand-logo";
 
 export default function PatientLoginPage() {
   const router = useRouter();
@@ -40,9 +41,10 @@ export default function PatientLoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
+        <CardHeader className="items-center text-center">
+          <BrandLogo href={null} className="mb-2" />
           <CardTitle className="text-2xl">تسجيل دخول المرضى</CardTitle>
           <CardDescription>لحجز ومتابعة مواعيدك</CardDescription>
         </CardHeader>

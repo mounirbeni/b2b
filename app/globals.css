@@ -3,27 +3,30 @@
 @tailwind utilities;
 
 @layer base {
+  /* MBN Health identity — one palette shared by the whole product.
+     Values mirror the app design system (app/(medflow)/medflow.css) so the
+     public site, auth, admin and patient areas read as the same product. */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --background: 216 38% 97%;        /* #f6f8fb — soft canvas */
+    --foreground: 222 47% 8%;         /* #0b1220 */
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 222 47% 8%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 210 90% 40%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 210 40% 92%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 210 90% 40%;
-    --radius: 0.5rem;
+    --popover-foreground: 222 47% 8%;
+    --primary: 221 83% 53%;           /* #2563EB */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 214 32% 95%;
+    --secondary-foreground: 222 47% 12%;
+    --muted: 214 32% 95%;
+    --muted-foreground: 215 14% 40%;  /* #5b6472 */
+    --accent: 214 30% 93%;
+    --accent-foreground: 222 47% 12%;
+    --destructive: 358 68% 58%;       /* #e5484d */
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 28% 92%;            /* #e7ebf0 */
+    --input: 214 28% 92%;
+    --ring: 221 83% 53%;
+    --radius: 0.75rem;
   }
 }
 

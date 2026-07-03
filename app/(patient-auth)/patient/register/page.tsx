@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BrandLogo } from "@/components/brand-logo";
 import { patientRegisterAction } from "./actions";
 
 export default function PatientRegisterPage() {
@@ -52,9 +53,10 @@ export default function PatientRegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
+        <CardHeader className="items-center text-center">
+          <BrandLogo href={null} className="mb-2" />
           <CardTitle className="text-2xl">إنشاء حساب مريض</CardTitle>
           <CardDescription>سجّل لحجز مواعيد لدى العيادات ومتابعتها</CardDescription>
         </CardHeader>

@@ -28,8 +28,8 @@ export default async function PublicLayout({ children }: { children: React.React
   const isClinic = session?.user?.role === "clinic";
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden bg-white">
-      <header className="sticky top-0 z-50 border-b border-slate-100/80 bg-white/80 backdrop-blur-xl backdrop-saturate-150">
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-background">
+      <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl backdrop-saturate-150">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
           <Link href="/" className="flex items-center gap-2.5">
             <BrandMark />
